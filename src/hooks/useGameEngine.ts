@@ -2,10 +2,10 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
-*/
+ */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GameState, ThrowStep, Ball, Pin, GameContextForCommentary, AssetsLoaded, VoicePersona, Particle, BowlingFrame, LaneCondition, BallMaterial, GameStatistics, Spectator, Player, GameMode, CpuPersonality, PlayerProfile, UserInventory } from '../types';
+import { GameState, ThrowStep, Ball, Pin, GameContextForCommentary, AssetsLoaded, Particle, BowlingFrame, LaneCondition, BallMaterial, GameStatistics, Spectator, Player, GameMode, CpuPersonality, PlayerProfile, UserInventory } from '../types';
 import {
     CANVAS_WIDTH, CANVAS_HEIGHT, LANE_WIDTH, BALL_RADIUS, PIN_RADIUS,
     BALL_START_Y, HEAD_PIN_Y, PIN_COLLISION_RADIUS,
@@ -27,24 +27,23 @@ type UseGameEngineProps = {
         cheerSoundRef: React.RefObject<HTMLAudioElement>;
         footstepsSoundRef: React.RefObject<HTMLAudioElement>;
     };
-    commentary: {
-        initLiveSession: (persona: VoicePersona) => Promise<void>;
-        triggerDynamicCommentary: (context: GameContextForCommentary) => Promise<boolean>;
-        volume: number;
-        setVolume: (v: number) => void;
-    };
-    selectedPersona: VoicePersona;
 };
 
-export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEngineProps) {
+export function useGameEngine({ assets }: UseGameEngineProps) {
     const [currentGameState, setCurrentGameState] = useState<GameState>('SPLASH');
-    const [throwStep, setThrowStep] = useState<ThrowStep | null>(null);
+    const [throwStep, setThrowStep] = useState<ThrowStep>('POSITION');
+    const [isCountingDown, setIsCountingDown] = useState(false);
+
+    // Oscillating values for All-in-One throw
+    const [aimOscillation, setAimOscillation] = useState(0); // -1 to 1
+    const [powerOscillation, setPowerOscillation] = useState(0.8); // 0.2 to 1.5
+    const [chargingDirection, setChargingDirection] = useState(1);
+    const [aimDirection, setAimDirection] = useState(1);
     const [gameMode, setGameMode] = useState<GameMode>('SOLO');
     const [isMobile, setIsMobile] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
     const [players, setPlayers] = useState<Player[]>([]);
     const [currentPlayerIdx, setCurrentPlayerIdx] = useState(0);
-    const currentPlayer = players[currentPlayerIdx]; 
     const [message, setMessage] = useState("Loading...");
     const [impactEffectText, setImpactEffectText] = useState("");
     const [showImpactEffect, setShowImpactEffect] = useState(false);
@@ -55,21 +54,55 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
     const [laneCondition, setLaneCondition] = useState<LaneCondition>('NORMAL');
     const [tutorialStep, setTutorialStep] = useState<number>(-1);
 
-    const ballRef = useRef<Ball>({ 
-        x: CANVAS_WIDTH / 2, y: BALL_START_Y, 
-        radius: BALL_RADIUS, dx: 0, dy: 0, 
+    const currentPlayer = players[currentPlayerIdx];
+
+    const rollBall = useCallback((powerFactor: number = 1.0, accuracyBias: number = 0.0) => {
+        if (currentGameState !== 'THROW_SEQUENCE' && currentGameState !== 'READY_TO_BOWL') return;
+
+        const finalPower = powerOscillation * powerFactor;
+        const finalAngle = aimOscillation * 45 + accuracyBias; // Degrees
+
+        setBall(prev => ({
+            ...prev,
+            angle: finalAngle,
+            weight: userWeight * finalPower
+        }));
+
+        ballRef.current.angle = finalAngle;
+        ballRef.current.weight = userWeight * finalPower;
+
+        setCurrentGameState('ROLLING');
+    }, [currentGameState, powerOscillation, aimOscillation, userWeight]);
+
+    const nextThrowStep = useCallback(() => {
+        if (throwStep === 'POSITION') {
+            setThrowStep('AIM');
+            setMessage("LOCK YOUR AIM");
+        } else if (throwStep === 'AIM') {
+            setThrowStep('POWER');
+            setMessage("LOCK YOUR POWER");
+        } else if (throwStep === 'POWER') {
+            rollBall();
+        }
+    }, [throwStep, rollBall]);
+
+
+
+    const ballRef = useRef<Ball>({
+        x: CANVAS_WIDTH / 2, y: BALL_START_Y,
+        radius: BALL_RADIUS, dx: 0, dy: 0,
         weight: 1.8, spin: 0, inGutter: false,
         material: 'PLASTIC', angle: 0
     });
     const pinsRef = useRef<Pin[]>([]);
-    const trailRef = useRef<{x: number, y: number, speed: number}[]>([]);
+    const trailRef = useRef<{ x: number, y: number, speed: number }[]>([]);
     const particlesRef = useRef<Particle[]>([]);
     const spectatorsRef = useRef<Spectator[]>([]);
     const pinsStandingBeforeThrowRef = useRef<number>(10);
 
     const [ball, setBall] = useState<Ball>(ballRef.current);
     const [pins, setPins] = useState<Pin[]>([]);
-    const [trail, setTrail] = useState<{x: number, y: number, speed: number}[]>([]);
+    const [trail, setTrail] = useState<{ x: number, y: number, speed: number }[]>([]);
     const [particles, setParticles] = useState<Particle[]>([]);
     const [spectators, setSpectators] = useState<Spectator[]>([]);
 
@@ -83,7 +116,7 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
         };
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        
+
         const specs: Spectator[] = [];
         const colors = ['#e53e3e', '#3182ce', '#38a169', '#d69e2e', '#805ad5'];
         for (let i = 0; i < 12; i++) {
@@ -114,32 +147,30 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
             ...contextExtra
         };
 
-        commentary.triggerDynamicCommentary(context);
-
         const newSpecs = [...spectatorsRef.current];
         if (event === 'strike' || event === 'spare') {
             newSpecs.forEach(s => s.state = 'CHEER');
-            assets.cheerSoundRef.current?.play().catch(() => {});
-            assets.clapSoundRef.current?.play().catch(() => {});
+            assets.cheerSoundRef.current?.play().catch(() => { });
+            assets.clapSoundRef.current?.play().catch(() => { });
             setImpactEffectText(event === 'strike' ? 'STRIKE!' : 'SPARE!');
             setShowImpactEffect(true);
             setTimeout(() => setShowImpactEffect(false), 2000);
         } else if (event === 'gutter') {
             newSpecs.forEach(s => s.state = 'BOO');
-            assets.awwSoundRef.current?.play().catch(() => {});
+            assets.awwSoundRef.current?.play().catch(() => { });
         } else if (event === 'throwOne') {
             newSpecs.forEach(s => s.state = Math.random() > 0.5 ? 'CHEER' : 'IDLE');
             if ((contextExtra.pinsKnocked || 0) > 7) {
-                assets.clapSoundRef.current?.play().catch(() => {});
+                assets.clapSoundRef.current?.play().catch(() => { });
             }
         }
         spectatorsRef.current = newSpecs;
         setSpectators(newSpecs);
-    }, [currentPlayer, laneCondition, commentary, assets]);
+    }, [currentPlayer, laneCondition, assets]);
 
     const spawnImpactParticles = (x: number, y: number, count: number = 10, color: string = '#fff') => {
         const newParticles: Particle[] = [];
-        for(let i=0; i<count; i++) {
+        for (let i = 0; i < count; i++) {
             newParticles.push({
                 x, y,
                 vx: (Math.random() - 0.5) * 12,
@@ -175,15 +206,24 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
         setIsZoomed(false);
     }, []);
 
+    const startThrowSequence = useCallback(() => {
+        setCurrentGameState('THROW_SEQUENCE');
+        setBall(prev => ({ ...prev, x: CANVAS_WIDTH / 2, y: BALL_START_Y, dx: 0, dy: 0, inGutter: false }));
+        setTrail([]);
+        setIsZoomed(false);
+        setThrowStep('POSITION');
+        setMessage("POSITION YOUR BALL");
+    }, []);
+
     const resetBall = useCallback(() => {
         const playerProfile = players[currentPlayerIdx]?.profile;
         let startX = CANVAS_WIDTH / 2;
         if (playerProfile?.handedness === 'LEFT') startX += 40;
         else if (playerProfile?.handedness === 'RIGHT') startX -= 40;
 
-        const newBall = { 
-            x: startX, y: BALL_START_Y, 
-            radius: BALL_RADIUS, dx: 0, dy: 0, 
+        const newBall = {
+            x: startX, y: BALL_START_Y,
+            radius: BALL_RADIUS, dx: 0, dy: 0,
             weight: userWeight, spin: userSpin, inGutter: false,
             material: userMaterial, angle: 0
         };
@@ -192,8 +232,8 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
         setBall(newBall);
         setTrail([]);
         setIsZoomed(false);
-        setThrowStep('WEIGHT');
-    }, [userWeight, userSpin, userMaterial, players, currentPlayerIdx]);
+        startThrowSequence();
+    }, [userWeight, userSpin, userMaterial, players, currentPlayerIdx, startThrowSequence]);
 
     const updatePhysics = useCallback(() => {
         const ball = ballRef.current;
@@ -216,11 +256,11 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
 
             if (!ball.inGutter) {
                 const hookForce = ball.spin * matParams.hookPotential * laneParams.hookModifier * 0.15;
-                ball.angle += hookForce; 
+                ball.angle += hookForce;
 
                 if (ball.x < LANE_LEFT_EDGE + BALL_RADIUS / 2 || ball.x > LANE_RIGHT_EDGE - BALL_RADIUS / 2) {
                     ball.inGutter = true;
-                    ball.x = ball.x < LANE_LEFT_EDGE + BALL_RADIUS / 2 ? LANE_LEFT_EDGE / 2 : LANE_RIGHT_EDGE + (CANVAS_WIDTH - LANE_RIGHT_EDGE)/2;
+                    ball.x = ball.x < LANE_LEFT_EDGE + BALL_RADIUS / 2 ? LANE_LEFT_EDGE / 2 : LANE_RIGHT_EDGE + (CANVAS_WIDTH - LANE_RIGHT_EDGE) / 2;
                     ball.dx = 0;
                     setMessage("GUTTER!");
                     triggerEvent('gutter');
@@ -235,6 +275,36 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
             ball.x += (targetX - ball.x) * 0.1;
             ball.y += (targetY - ball.y) * 0.05;
             setIsZoomed(false);
+        } else if (currentGameState === 'THROW_SEQUENCE') {
+            if (throwStep === 'AIM') {
+                setAimOscillation(prev => {
+                    let next = prev + aimDirection * 0.02;
+                    if (next > 1 || next < -1) {
+                        setAimDirection(-aimDirection);
+                        next = Math.max(-1, Math.min(1, next));
+                    }
+                    return next;
+                });
+            } else if (throwStep === 'POWER') {
+                setPowerOscillation(prev => {
+                    let next = prev + chargingDirection * 0.03;
+                    if (next > 1.5 || next < 0.2) {
+                        setChargingDirection(-chargingDirection);
+                        next = Math.max(0.2, Math.min(1.5, next));
+                    }
+                    return next;
+                });
+            } else if (throwStep === 'POSITION') {
+                setBall(prev => {
+                    let nextX = prev.x + (aimDirection * 3);
+                    if (nextX > LANE_RIGHT_EDGE - BALL_RADIUS || nextX < LANE_LEFT_EDGE + BALL_RADIUS) {
+                        setAimDirection(-aimDirection);
+                        nextX = Math.max(LANE_LEFT_EDGE + BALL_RADIUS, Math.min(LANE_RIGHT_EDGE - BALL_RADIUS, nextX));
+                    }
+                    ballRef.current.x = nextX;
+                    return { ...prev, x: nextX };
+                });
+            }
         }
 
         if (!ball.inGutter && currentGameState === 'ROLLING') {
@@ -245,20 +315,26 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
                 if (Math.sqrt(dx * dx + dy * dy) < PIN_COLLISION_RADIUS) {
                     pin.isDown = true;
                     const matRestitution = MATERIAL_PROPS[ball.material].restitution;
-                    const force = 12 * ball.weight * (1/matRestitution);
+
+                    // Special item effects
+                    let impactMult = 1.0;
+                    if (players[0]?.inventory.items.includes('magma_ball')) impactMult = 1.15;
+                    if (players[0]?.inventory.items.includes('titanium_beast')) impactMult = 1.25;
+
+                    const force = 12 * ball.weight * (1 / matRestitution) * impactMult;
                     pin.vx = ((pin.x - ball.x) / PIN_COLLISION_RADIUS) * force;
                     pin.vy = ((pin.y - ball.y) / PIN_COLLISION_RADIUS) * force - 8;
                     pin.va = (Math.random() - 0.5) * 15.0 + (ball.spin * 20);
-                    
+
                     spawnImpactParticles(pin.x, pin.y, 15, '#fff');
                     if (!soundPlayedThisFrame) {
-                        try { assets.pinHitSoundRef.current?.play().catch(() => {}); } catch (e) {}
+                        try { assets.pinHitSoundRef.current?.play().catch(() => { }); } catch (e) { }
                         soundPlayedThisFrame = true;
                     }
                 }
             });
         }
-        
+
         for (let i = 0; i < pins.length; i++) {
             const p1 = pins[i];
             if (p1.isDown || Math.abs(p1.vx) > 0.1 || Math.abs(p1.vy) > 0.1) {
@@ -273,19 +349,19 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
                             p2.isDown = true;
                             p2.vx = p1.vx * IMPACT_FACTOR + (Math.random() - 0.5);
                             p2.vy = p1.vy * IMPACT_FACTOR - 1;
-                            p2.va = -p1.va * 0.5 + (Math.random()-0.5);
+                            p2.va = -p1.va * 0.5 + (Math.random() - 0.5);
                             spawnImpactParticles(p2.x, p2.y, 8, '#fef08a');
-                            try { (assets.pinHitSoundRef.current?.cloneNode() as HTMLAudioElement).play().catch(() => {}); } catch (e) {}
+                            try { (assets.pinHitSoundRef.current?.cloneNode() as HTMLAudioElement).play().catch(() => { }); } catch (e) { }
                         }
                     }
                 }
             }
         }
-        
+
         const activeParticles = [];
-        for(const p of particlesRef.current) {
+        for (const p of particlesRef.current) {
             p.x += p.vx; p.y += p.vy; p.vy += 0.5; p.life -= 0.02;
-            if(p.life > 0) activeParticles.push(p);
+            if (p.life > 0) activeParticles.push(p);
         }
         particlesRef.current = activeParticles;
 
@@ -294,7 +370,7 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
         setTrail([...trailRef.current]);
         setParticles([...particlesRef.current]);
         setSpectators([...spectatorsRef.current]);
-    }, [currentGameState, assets, laneCondition, currentPlayer, triggerEvent]);
+    }, [currentGameState, assets, laneCondition, currentPlayer, triggerEvent, throwStep, aimDirection, chargingDirection]);
 
     // CPU Logic Simulation
     useEffect(() => {
@@ -311,13 +387,13 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
                 ballRef.current.angle = targetAngle;
                 ballRef.current.weight = weight;
                 ballRef.current.spin = spin;
-                
-                setBall({...ballRef.current});
+
+                setBall({ ...ballRef.current });
                 setTimeout(() => rollBall(), 800);
             }, 1500);
             return () => clearTimeout(timer);
         }
-    }, [currentGameState, currentPlayer]);
+    }, [currentGameState, currentPlayer, rollBall]);
 
     useEffect(() => {
         if (['SPLASH', 'MENU', 'PLAYER_CREATOR', 'READY_TO_BOWL', 'GAME_OVER', 'TUTORIAL'].includes(currentGameState)) return;
@@ -365,21 +441,21 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
 
         const newRolls = [...currentPlayer.rolls, knockedPins];
         const tempFrames = calculateBowlingScore(newRolls);
-        const totalScore = tempFrames[tempFrames.length-1]?.cumulativeScore || 0;
+        const totalScore = tempFrames[tempFrames.length - 1]?.cumulativeScore || 0;
         const updatedPlayers = [...players];
-        
+
         // --- Reward Logic for Human P1 ---
         let p1 = updatedPlayers[0];
         if (p1 && p1.id === 1 && p1.profile) {
             let xpGain = knockedPins * XP_PER_PIN;
             let moneyGain = knockedPins * WINNINGS_PER_POINT;
-            
+
             if (eventType === 'strike') { xpGain += XP_PER_STRIKE; moneyGain += 50; }
             else if (eventType === 'spare') { xpGain += XP_PER_SPARE; moneyGain += 20; }
-            
+
             p1.profile = { ...p1.profile, xp: (p1.profile.xp || 0) + xpGain };
             p1.inventory = { ...p1.inventory, money: (p1.inventory.money || 0) + moneyGain };
-            
+
             // Check Level Up
             const currentLevel = p1.profile.level;
             const nextXp = LEVELS[currentLevel] || 999999;
@@ -396,8 +472,8 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
         triggerEvent(eventType, { pinsKnocked: knockedPins, totalScore });
 
         setCurrentGameState('BALL_RETURN');
-        assets.ballReturnSoundRef.current?.play().catch(() => {});
-        
+        assets.ballReturnSoundRef.current?.play().catch(() => { });
+
         setTimeout(() => {
             if (updatedPlayers.every(p => isGameOver(p.frames))) {
                 setCurrentGameState('GAME_OVER');
@@ -412,7 +488,7 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
                     standing.forEach(p => { p.vx = 0; p.vy = 0; p.va = 0; p.wobble = 0; p.isDown = false; });
                     pinsRef.current = standing;
                     setPins(standing);
-                    nextIdx = currentPlayerIdx; 
+                    nextIdx = currentPlayerIdx;
                 }
                 setCurrentPlayerIdx(nextIdx);
                 resetBall();
@@ -484,27 +560,10 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
         resetBall();
         setCurrentGameState(mode === 'SOLO' ? 'TUTORIAL' : 'READY_TO_BOWL');
         setTutorialStep(0);
-        try { 
-            commentary.initLiveSession(selectedPersona).then(() => {
-                triggerEvent('gameStart');
-            }); 
-        } catch (e) {}
+        triggerEvent('gameStart');
     };
 
-    const rollBall = useCallback((powerFactor: number = 1.0, accuracyBias: number = 0.0) => {
-        if (currentGameState !== 'READY_TO_BOWL') return;
-        setCurrentGameState('ROLLING');
-    }, [currentGameState]);
 
-    const nextStep = useCallback(() => {
-        const steps: ThrowStep[] = ['WEIGHT', 'SPIN', 'POSITION', 'AIM', 'POWER', 'RELEASE'];
-        const currentIdx = steps.indexOf(throwStep || 'WEIGHT');
-        if (currentIdx === steps.length - 1) {
-            rollBall();
-        } else {
-            setThrowStep(steps[currentIdx + 1]);
-        }
-    }, [throwStep, rollBall]);
 
     const cheatMoney = useCallback(() => {
         const inv = loadProgress();
@@ -519,12 +578,13 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
     }, []);
 
     return {
-        currentGameState, setCurrentGameState, throwStep, nextStep, setThrowStep, gameMode, players, currentPlayerIdx, ball, pins, trail, particles, spectators, message, impactEffectText, showImpactEffect, showLevelUp, setShowLevelUp, isMobile, isZoomed,
+        currentGameState, setCurrentGameState, throwStep, nextThrowStep, setThrowStep, gameMode, players, currentPlayerIdx, ball, pins, trail, particles, spectators, message, impactEffectText, showImpactEffect, showLevelUp, setShowLevelUp, isMobile, isZoomed,
         userWeight, userSpin, userMaterial, laneCondition, setUserWeight, setUserSpin, setUserMaterial, setLaneCondition,
-        startGame, rollBall, cheatMoney,
+        aimOscillation, powerOscillation,
+        startGame, startThrowSequence, rollBall, cheatMoney,
         updateProfile: (p: PlayerProfile) => { const inv = loadProgress(); inv.profile = p; saveProgress(inv); },
         setBallPosition: (x: number) => {
-            const limit = (CANVAS_WIDTH - LANE_WIDTH)/2 + BALL_RADIUS;
+            const limit = (CANVAS_WIDTH - LANE_WIDTH) / 2 + BALL_RADIUS;
             ballRef.current = { ...ballRef.current, x: Math.max(limit, Math.min(CANVAS_WIDTH - limit, x)) };
             setBall({ ...ballRef.current });
         },
@@ -533,8 +593,6 @@ export function useGameEngine({ assets, commentary, selectedPersona }: UseGameEn
             setBall({ ...ballRef.current });
         },
         tutorialStep, advanceTutorial: () => setTutorialStep(prev => prev + 1), endTutorial: () => { setTutorialStep(-1); setCurrentGameState('READY_TO_BOWL'); },
-        canvasRef,
-        commentaryVolume: commentary.volume,
-        setCommentaryVolume: commentary.setVolume
+        canvasRef
     };
 }

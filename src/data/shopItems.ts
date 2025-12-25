@@ -10,23 +10,23 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'urethane_ball',
         name: 'Storm Urethane',
-        description: 'Vintage feel. Smooth controllable arc.',
+        description: 'Smooth controllable arc. Perfect for DRY lanes where reactive balls over-hook.',
         price: 400,
         category: 'BALL',
-        effectDescription: 'Material: Urethane (Med Hook)'
+        effectDescription: 'Material: Urethane (Stable on Dry Lanes)'
     },
     {
         id: 'resin_ball',
         name: 'Viper Reactive Resin',
-        description: 'High friction coverstock for aggressive hook.',
+        description: 'Aggressive hook potential. Ideal for NORMAL or OILY lanes to cut through the oil.',
         price: 900,
         category: 'BALL',
-        effectDescription: 'Material: Resin (Max Hook)'
+        effectDescription: 'Material: Resin (Cuts through Oil)'
     },
     {
         id: 'magma_ball',
         name: 'Magma Core Pro',
-        description: 'Molten power for maximum pin action.',
+        description: 'Heavy internal weight block. Massive pin carry and explosive impact.',
         price: 1500,
         category: 'BALL',
         effectDescription: 'Explosive Pin Action +15%'
@@ -34,31 +34,31 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'ice_storm',
         name: 'Ice Storm Elite',
-        description: 'Precision ball for dry lanes.',
+        description: 'Zero-hook plastic ball. Best for technical spare shooting or extremely DRY conditions.',
         price: 1200,
         category: 'BALL',
-        effectDescription: 'Smooth Glide +Accuracy'
+        effectDescription: 'Ultra-Straight Glide +Accuracy'
     },
     {
         id: 'quantum_sphere',
         name: 'Quantum Sphere X',
-        description: 'Experimental nano-coating technology.',
+        description: 'Nanotech surface adapts to any lane. Great all-around reaction.',
         price: 2500,
         category: 'BALL',
-        effectDescription: 'Perfect Hook Control'
+        effectDescription: 'Adaptive Hook Control'
     },
     {
         id: 'heavy_ball_license',
         name: 'Rhino Core Ball',
-        description: 'Dense core technology for maximum impact.',
+        description: 'High-density core. Smashes through the pins with pure momentum.',
         price: 800,
         category: 'BALL',
-        effectDescription: 'Unlocks Heavy Weight (2.5x)'
+        effectDescription: 'Unlocks Heavy Weight (2.5lb)'
     },
     {
         id: 'neon_glow_ball',
-        name: 'Neon Glow Ball',
-        description: 'Glows in cosmic patterns. Pure style.',
+        name: 'Cyber Neon Ball',
+        description: 'Holographic surface. Increases crowd hype and scoring multiplier.',
         price: 1800,
         category: 'BALL',
         effectDescription: 'Visual Flair +Crowd Appeal'
@@ -66,7 +66,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'titanium_beast',
         name: 'Titanium Beast',
-        description: 'Military-grade bowling power.',
+        description: 'Military-grade core. Unstoppable force for OILY lanes.',
         price: 3000,
         category: 'BALL',
         effectDescription: 'Maximum Power +25%'
@@ -76,7 +76,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'pro_shoes',
         name: 'Pro Glide Shoes',
-        description: 'High-performance leather bowling shoes.',
+        description: 'Superior approach stability. Better sliding control.',
         price: 500,
         category: 'SHOES',
         effectDescription: 'Earn 2x Winnings'
@@ -84,7 +84,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'stealth_slides',
         name: 'Stealth Slides',
-        description: 'Silent approach, deadly accuracy.',
+        description: 'Precision grip for better aim timing.',
         price: 750,
         category: 'SHOES',
         effectDescription: '+Accuracy Bonus'
@@ -92,7 +92,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'rocket_boots',
         name: 'Rocket Boots',
-        description: 'For bowlers who move fast.',
+        description: 'Turbocharge your approach speed.',
         price: 1200,
         category: 'SHOES',
         effectDescription: 'Faster Games +1 Frame'
@@ -100,7 +100,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'golden_slippers',
         name: 'Golden Slippers',
-        description: 'Luxury footwear for champions.',
+        description: 'Gold-plated soles for the elite.',
         price: 2000,
         category: 'SHOES',
         effectDescription: 'Earn 3x Winnings'
@@ -110,7 +110,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'retro_shirt',
         name: 'Retro Bowling Shirt',
-        description: 'Classic 50s style silk shirt.',
+        description: 'Classic 50s style silk shirt. A vintage look for the lane.',
         price: 300,
         category: 'CLOTHING',
         effectDescription: 'Classic Style'
@@ -118,7 +118,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'pro_jersey',
         name: 'Pro Tour Jersey',
-        description: 'Moisture wicking fabric for serious bowlers.',
+        description: 'Breathable composite fabric for pro tournaments.',
         price: 800,
         category: 'CLOTHING',
         effectDescription: '+Endurance +1 Power'
@@ -126,7 +126,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'neon_outfit',
         name: 'Neon Cyber Suit',
-        description: 'Glow in the dark outfit. Future vibes.',
+        description: 'Glowing circuitry woven into the fabric.',
         price: 2000,
         category: 'CLOTHING',
         effectDescription: 'Ultimate Style +Crowd Love'
@@ -134,7 +134,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'chicken_suit',
         name: 'Chicken Mascot',
-        description: 'Why? Because it\'s hilarious.',
+        description: 'Distract your opponents. Enter the arena as a giant chicken.',
         price: 1000,
         category: 'CLOTHING',
         effectDescription: 'Crowd Goes Wild'
@@ -142,7 +142,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'samurai_armor',
         name: 'Samurai Armor',
-        description: 'Ancient warrior meets modern bowler.',
+        description: 'Dishonor for the pins. Heavy plated armor for protection.',
         price: 2500,
         category: 'CLOTHING',
         effectDescription: '+3 All Stats'
@@ -150,7 +150,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'disco_outfit',
         name: 'Disco Inferno',
-        description: 'Bring back the 70s in style.',
+        description: 'Reflective sequins for maximum groove.',
         price: 1500,
         category: 'CLOTHING',
         effectDescription: 'Groovy Vibes +XP Bonus'
@@ -158,7 +158,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'space_suit',
         name: 'Cosmic Explorer Suit',
-        description: 'Bowl among the stars.',
+        description: 'Pressurized for bowling in a vacuum.',
         price: 3500,
         category: 'CLOTHING',
         effectDescription: 'Zero Gravity Mode'
@@ -166,7 +166,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'tuxedo',
         name: 'Championship Tuxedo',
-        description: 'Bowl like a boss. Look like a champion.',
+        description: 'The finest Italian silk for the world finals.',
         price: 2200,
         category: 'CLOTHING',
         effectDescription: 'Professional Aura +2 All'
@@ -176,7 +176,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'wrist_guard',
         name: 'Cobra Wrist Guard',
-        description: 'Stabilizes your throw for extreme spin.',
+        description: 'Locked-in wrist position for consistent hook.',
         price: 600,
         category: 'GEAR',
         effectDescription: 'Unlocks Max Spin Control'
@@ -184,7 +184,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'power_glove',
         name: 'Power Glove Pro',
-        description: 'Enhanced grip and ball control.',
+        description: 'Electronic sensors for the perfect release point.',
         price: 850,
         category: 'GEAR',
         effectDescription: '+Control +Accuracy'
@@ -192,7 +192,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'lucky_towel',
         name: 'Lucky Champion Towel',
-        description: 'Every pro has one. Now you do too.',
+        description: 'Keeps your ball clean and your luck high.',
         price: 200,
         category: 'ACCESSORY',
         effectDescription: '+5% Strike Chance'
@@ -200,7 +200,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'rosin_bag',
         name: 'Ultra Rosin Bag',
-        description: 'Perfect grip every time.',
+        description: 'Eliminate hand tension for a silky release.',
         price: 150,
         category: 'ACCESSORY',
         effectDescription: 'Better Release'
@@ -208,7 +208,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'smart_watch',
         name: 'BowlSmart Watch',
-        description: 'Tracks your stats in real-time.',
+        description: 'Measures rev rate and ball speed.',
         price: 1200,
         category: 'ACCESSORY',
         effectDescription: 'Show Advanced Stats'
@@ -216,7 +216,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'championship_ring',
         name: 'Championship Ring',
-        description: 'Proof of your excellence.',
+        description: 'The heaviest hardware in the industry.',
         price: 5000,
         category: 'ACCESSORY',
         effectDescription: 'Prestige +50% XP Gain'
@@ -224,7 +224,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'energy_drink',
         name: 'Infinite Energy Drink',
-        description: 'Never get tired. Unlimited power!',
+        description: 'Synthesized electrolytes for infinite stamina.',
         price: 300,
         category: 'ACCESSORY',
         effectDescription: '+Endurance No Fatigue'
@@ -232,7 +232,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'headband',
         name: 'Focus Headband',
-        description: 'Channel your inner champion.',
+        description: 'Blocks out the crowd. Just you and the pins.',
         price: 400,
         category: 'ACCESSORY',
         effectDescription: '+Concentration +Aim'
@@ -240,7 +240,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'sunglasses',
         name: 'Cool Shades',
-        description: 'Look cool, bowl cooler.',
+        description: 'Polarized for cosmic bowling laser shows.',
         price: 350,
         category: 'ACCESSORY',
         effectDescription: 'Style Points +150%'
@@ -248,7 +248,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'golden_dice',
         name: 'Golden Luck Dice',
-        description: 'Roll the dice, strike it nice.',
+        description: 'Physics-defying luck with every roll.',
         price: 800,
         category: 'ACCESSORY',
         effectDescription: '+Luck +Critical Strikes'
@@ -258,7 +258,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'vip_membership',
         name: 'VIP Alley Pass',
-        description: 'Access to premium lanes and features.',
+        description: 'The ultimate status symbol. Access to hidden alleys.',
         price: 10000,
         category: 'ACCESSORY',
         effectDescription: 'Unlock VIP Features'
@@ -266,7 +266,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'ai_coach',
         name: 'AI Coach Assistant',
-        description: 'Personal AI bowling coach.',
+        description: 'Real-time biomechanical analysis.',
         price: 7500,
         category: 'ACCESSORY',
         effectDescription: 'Real-time Tips +Hints'
@@ -274,7 +274,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     {
         id: 'mystery_box',
         name: 'Mystery Mega Box',
-        description: 'Could be anything! Take a chance.',
+        description: 'A gamble for the truly brave bowlers.',
         price: 2500,
         category: 'ACCESSORY',
         effectDescription: 'Random Premium Item'

@@ -49,6 +49,7 @@ export interface PlayerProfile {
     statPoints: number; // Available to spend
     avatarImage?: string; // Base64 string of the generated avatar
     equippedOutfitId?: string;
+    equippedBallId?: string;
     career?: CareerRecord;
 }
 
@@ -85,9 +86,9 @@ export interface Pin {
     isDown: boolean;
     vx: number;
     vy: number;
-    angle: number; 
+    angle: number;
     va: number;
-    wobble: number; 
+    wobble: number;
 }
 
 export interface GameContextForCommentary {
@@ -128,7 +129,7 @@ export interface Particle {
 export interface BowlingFrame {
     frameNumber: number;
     rolls: number[];
-    score: number | null; 
+    score: number | null;
     isStrike: boolean;
     isSpare: boolean;
     cumulativeScore: number | null;
@@ -147,7 +148,7 @@ export interface ShopItem {
 
 export interface UserInventory {
     money: number;
-    items: string[]; 
+    items: string[];
     profile?: PlayerProfile; // Persisted profile
 }
 
@@ -158,7 +159,7 @@ export interface GameStatistics {
     gutters: number;
     openFrames: number;
     totalPins: number;
-    accuracy: number; 
+    accuracy: number;
 }
 
 export interface Spectator {

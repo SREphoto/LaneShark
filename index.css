@@ -952,3 +952,55 @@ canvas {
 .glow-effect {
     box-shadow: 0 0 20px currentColor;
 }
+
+.shadow-glow-effect {
+    text-shadow: 0 0 10px rgba(102, 126, 234, 0.8), 0 0 20px rgba(102, 126, 234, 0.4);
+}
+
+.shadow-blue-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.shadow-emerald-glow {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+.shadow-purple-glow {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+}
+
+.shadow-gold-glow {
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
+}
+
+.animate-scale-in {
+    animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-slide-in-right {
+    animation: slide-in-right 0.5s ease-out;
+}
+
+@keyframes slide-in-right {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

@@ -1,7 +1,8 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
-*/
+ */
 
 import React from 'react';
 import { GameStatistics, PlayerProfile } from '../types';
@@ -14,64 +15,86 @@ interface StatisticsScreenProps {
 
 const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ stats, profile, onClose }) => {
     return (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 animate-fade-in">
-            <div className="bg-gray-800 border-4 border-yellow-500 p-6 max-w-md w-full shadow-[0_0_20px_rgba(234,179,8,0.5)] font-['Press_Start_2P'] text-white">
-                <h2 className="text-2xl text-yellow-400 text-center mb-6 text-shadow">GAME OVER</h2>
-                
-                <div className="space-y-4 mb-6">
-                    <div className="flex justify-between border-b border-gray-600 pb-2">
-                        <span className="text-gray-400">FINAL SCORE</span>
-                        <span className="text-xl text-yellow-300">{stats.totalScore}</span>
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 animate-fade-in bg-black/80 backdrop-blur-xl">
+            <div className="relative w-full max-w-lg glass-card p-10 flex flex-col animate-slide-up bg-[#1a1a2e]/60 border-2 border-yellow-500/30">
+
+                {/* Header */}
+                <div className="text-center mb-10">
+                    <h2 className="text-4xl font-['Press_Start_2P'] gradient-text mb-2 tracking-tighter">
+                        TOURNAMENT RESULTS
+                    </h2>
+                    <div className="h-1 w-24 bg-yellow-500 mx-auto rounded-full shadow-gold-glow" />
+                </div>
+
+                {/* Game Stats */}
+                <div className="space-y-6 mb-10">
+                    <div className="glass-panel p-6 flex justify-between items-center group hover:bg-white/5 transition-all">
+                        <span className="text-[10px] font-['Press_Start_2P'] text-gray-400 group-hover:text-white">FINAL SCORE</span>
+                        <span className="text-3xl font-['Press_Start_2P'] gold-text shadow-gold-glow animate-pulse">
+                            {stats.totalScore.toLocaleString()}
+                        </span>
                     </div>
-                    
-                    <div className="flex justify-between">
-                        <span className="text-blue-300">STRIKES</span>
-                        <span>{stats.strikes}</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                        <span className="text-green-300">SPARES</span>
-                        <span>{stats.spares}</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                        <span className="text-purple-300">ACCURACY</span>
-                        <span>{stats.accuracy.toFixed(1)}%</span>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="glass-panel p-4 flex flex-col items-center gap-2">
+                            <span className="text-[8px] font-['Press_Start_2P'] text-emerald-400">STRIKES</span>
+                            <span className="text-lg font-['Press_Start_2P'] text-white">{stats.strikes}</span>
+                        </div>
+                        <div className="glass-panel p-4 flex flex-col items-center gap-2">
+                            <span className="text-[8px] font-['Press_Start_2P'] text-blue-400">SPARES</span>
+                            <span className="text-lg font-['Press_Start_2P'] text-white">{stats.spares}</span>
+                        </div>
+                        <div className="glass-panel p-4 flex flex-col items-center gap-2">
+                            <span className="text-[8px] font-['Press_Start_2P'] text-purple-400">ACCURACY</span>
+                            <span className="text-sm font-['Press_Start_2P'] text-white">{stats.accuracy.toFixed(1)}%</span>
+                        </div>
+                        <div className="glass-panel p-4 flex flex-col items-center gap-2">
+                            <span className="text-[8px] font-['Press_Start_2P'] text-red-400">GUTTERS</span>
+                            <span className="text-sm font-['Press_Start_2P'] text-white">{stats.gutters}</span>
+                        </div>
                     </div>
                 </div>
 
+                {/* Career Section */}
                 {profile?.career && (
-                    <div className="mt-4 pt-4 border-t-2 border-white">
-                        <h3 className="text-sm text-yellow-200 mb-2 text-center">CAREER RECORD</h3>
-                        <div className="text-xs space-y-2 text-gray-300">
-                             <div className="flex justify-between">
-                                <span>SOLO HIGH SCORE:</span>
-                                <span className="text-white">{profile.career.soloHighScore}</span>
+                    <div className="glass-panel p-6 bg-purple-900/10 border-purple-500/20 mb-8">
+                        <h3 className="text-[9px] font-['Press_Start_2P'] text-purple-400 mb-4 text-center tracking-widest">CAREER ACHIEVEMENTS</h3>
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                                <span className="text-[7px] font-['Press_Start_2P'] text-gray-500 uppercase">Personal Best</span>
+                                <span className="text-[10px] font-['Press_Start_2P'] text-white">{profile.career.soloHighScore}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span>VS CPU RECORD:</span>
-                                <span className="text-white">{profile.career.vsCpuWins}W - {profile.career.vsCpuLosses}L</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>CURRENT STREAK:</span>
-                                <span className={profile.career.currentStreak >= 0 ? "text-green-400" : "text-red-400"}>
-                                    {profile.career.currentStreak > 0 ? `+${profile.career.currentStreak} W` : `${profile.career.currentStreak} L`}
+                            <div className="flex justify-between items-center">
+                                <span className="text-[7px] font-['Press_Start_2P'] text-gray-500 uppercase">Arena Record</span>
+                                <span className="text-[10px] font-['Press_Start_2P'] text-emerald-400">
+                                    {profile.career.vsCpuWins}W - {profile.career.vsCpuLosses}L
                                 </span>
                             </div>
-                            <div className="flex justify-between">
-                                <span>TOTAL GAMES:</span>
-                                <span className="text-white">{profile.career.gamesPlayed}</span>
+                            <div className="flex justify-between items-center">
+                                <span className="text-[7px] font-['Press_Start_2P'] text-gray-500 uppercase">Season Streak</span>
+                                <span className={`text-[10px] font-['Press_Start_2P'] ${profile.career.currentStreak >= 0 ? "text-blue-400" : "text-red-400"}`}>
+                                    {profile.career.currentStreak > 0 ? `+${profile.career.currentStreak} FIRE` : `${profile.career.currentStreak} COLD`}
+                                </span>
                             </div>
                         </div>
                     </div>
                 )}
 
-                <button 
+                {/* Action Button */}
+                <button
                     onClick={onClose}
-                    className="w-full bg-red-600 hover:bg-red-500 text-white py-3 border-2 border-white shadow-lg transition-transform active:scale-95 mt-6"
+                    className="btn-primary w-full py-5 text-sm font-['Press_Start_2P'] group relative overflow-hidden"
                 >
-                    CONTINUE
+                    <span className="relative z-10">🚀 RETURN TO ARENA</span>
                 </button>
+
+                {/* Visual Flair */}
+                <div className="absolute top-0 right-0 p-4">
+                    <div className="w-16 h-16 border-t-2 border-r-2 border-yellow-500/40 rounded-tr-xl" />
+                </div>
+                <div className="absolute bottom-0 left-0 p-4">
+                    <div className="w-16 h-16 border-b-2 border-l-2 border-yellow-500/40 rounded-bl-xl" />
+                </div>
             </div>
         </div>
     );
