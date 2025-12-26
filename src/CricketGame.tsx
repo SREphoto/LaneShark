@@ -250,48 +250,83 @@ function LaneSharkGame() {
             {game.currentGameState !== 'SPLASH' && game.currentGameState !== 'MENU' && game.currentGameState !== 'PLAYER_CREATOR' && (
                 <div className="h-full w-full relative overflow-hidden">
                     {/* Game HUD */}
-                    <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-black/60 to-transparent flex items-center justify-between px-6 z-50">
-                        <div className="flex items-center gap-6">
+                    {/* Responsive HUD Overlay */}
+                    <div className="absolute inset-0 z-50 pointer-events-none flex flex-col justify-between">
+
+                        {/* 1. Top Bar: Navigation, Title, Economy */}
+                        <div className="w-full bg-gradient-to-b from-black/90 via-black/40 to-transparent p-4 flex items-start justify-between pointer-events-auto">
+                            {/* Left: Exit */}
                             <button
                                 onClick={() => game.setCurrentGameState('MENU')}
-                                className="group flex items-center gap-2 px-4 py-1.5 bg-red-950/40 border border-red-500/30 rounded-lg hover:bg-red-900 transition-all"
+                                className="group flex items-center gap-2 px-3 py-2 bg-red-950/40 border border-red-500/30 rounded-xl hover:bg-red-900 transition-all hover:scale-105 active:scale-95 shadow-lg backdrop-blur-md"
                             >
-                                <span className="text-red-500 group-hover:scale-125 transition-transform">⬅</span>
-                                <span className="text-[8px] font-['Press_Start_2P'] text-red-200">EXIT</span>
+                                <span className="text-red-500 text-xs sm:text-base">⬅</span>
+                                <span className="hidden sm:block text-[8px] font-['Press_Start_2P'] text-red-200">EXIT</span>
                             </button>
 
-                            <div className="flex flex-col">
-                                <h1 className="text-lg font-['Press_Start_2P'] gradient-text shadow-glow-effect">LANESHARK</h1>
-                            </div>
-                        </div>
+                            {/* Center: Title (Hidden on small mobile) & Messages */}
+                            <div className="flex flex-col items-center flex-1 mx-4">
+                                <h1 className="hidden md:block text-xs font-['Press_Start_2P'] gradient-text shadow-glow-effect mb-2">LANESHARK</h1>
 
-                        <div className="flex items-center gap-4">
-                            <div className="px-6 py-2 glass-panel border border-emerald-500/30">
-                                <span className="text-[10px] font-['Press_Start_2P'] text-emerald-400">
-                                    ${inventory.money.toLocaleString()}
-                                </span>
-                            </div>
+                                {/* Dynamic Message Area */}
+                                <div className="pointer-events-none flex flex-col items-center gap-2 w-full max-w-md">
+                                    <MessageDisplay message={game.message} />
 
-                            {isBowlReady && !currentPlayer?.isCpu && (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setShowBallSettings(!showBallSettings)}
-                                        className={`px-4 py-2 border-2 rounded-lg font-['Press_Start_2P'] text-[8px] transition-all ${showBallSettings
-                                            ? 'bg-yellow-600 border-white text-white shadow-gold-glow'
-                                            : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
-                                            }`}
-                                    >
-                                        SETTINGS
-                                    </button>
-                                    <button
-                                        onClick={() => setIsShopOpen(true)}
-                                        className="btn-primary px-4 py-2 rounded-lg font-['Press_Start_2P'] text-[8px] border-2 border-white/20"
-                                    >
-                                        SHOP
-                                    </button>
+                                    {isThrowing && (
+                                        <div className="px-4 py-2 bg-blue-950/40 border border-blue-500/40 rounded-full animate-pulse backdrop-blur-md">
+                                            <div className="text-blue-200 font-['Press_Start_2P'] text-[8px] tracking-widest text-center whitespace-nowrap">
+                                                SPACE / TAP TO LOCK
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {currentPlayer?.isCpu && (
+                                        <div className="px-4 py-2 bg-red-950/60 border border-red-500/40 rounded-lg animate-pulse backdrop-blur-md">
+                                            <div className="text-red-300 font-['Press_Start_2P'] text-[7px] uppercase text-center mb-1">
+                                                CPU: {currentPlayer.name}
+                                            </div>
+                                            <div className="text-gray-400 font-['Press_Start_2P'] text-[6px] italic text-center">
+                                                "{currentPlayer.cpuProfile?.description}"
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
+
+                            {/* Right: Economy & Tools */}
+                            <div className="flex flex-col items-end gap-2">
+                                <div className="px-3 py-1.5 glass-panel border border-emerald-500/30 rounded-lg shadow-lg">
+                                    <span className="text-[9px] font-['Press_Start_2P'] text-emerald-400">
+                                        ${inventory.money.toLocaleString()}
+                                    </span>
+                                </div>
+
+                                {isBowlReady && !currentPlayer?.isCpu && (
+                                    <div className="flex gap-2 mt-1">
+                                        <button
+                                            onClick={() => setShowBallSettings(!showBallSettings)}
+                                            className={`p-2 rounded-lg border transition-all hover:scale-110 active:scale-95 ${showBallSettings
+                                                    ? 'bg-yellow-600 border-white text-white shadow-gold-glow'
+                                                    : 'bg-black/40 border-white/20 text-gray-400 hover:bg-white/10'
+                                                }`}
+                                            title="Settings"
+                                        >
+                                            ⚙️
+                                        </button>
+                                        <button
+                                            onClick={() => setIsShopOpen(true)}
+                                            className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 border border-white/30 hover:scale-110 active:scale-95 shadow-lg"
+                                            title="Shop"
+                                        >
+                                            🛒
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
+
+                        {/* 2. Bottom Area: Intentionally empty for bowler interaction and scorecard visibility */}
+                        <div className="pointer-events-none h-24 w-full" />
                     </div>
 
                     <GameCanvas
@@ -378,28 +413,7 @@ function LaneSharkGame() {
                         />
                     )}
 
-                    <div className="absolute top-28 left-6 w-72 flex flex-col z-40 pointer-events-none space-y-4">
-                        <div className="pointer-events-auto">
-                            <MessageDisplay message={game.message} />
-                        </div>
 
-                        {currentPlayer?.isCpu && (
-                            <div className="pointer-events-auto glass-panel p-4 border-red-500/40 animate-pulse bg-red-950/20">
-                                <div className="text-red-400 font-['Press_Start_2P'] text-[8px] mb-2 uppercase">CPU TURN: {currentPlayer.name}</div>
-                                <div className="text-gray-400 font-['Press_Start_2P'] text-[6px] leading-relaxed italic">"{currentPlayer.cpuProfile?.description}"</div>
-                            </div>
-                        )}
-
-                        {/* Click to bowl replaced by direct bowler click */}
-
-                        {isThrowing && (
-                            <div className="pointer-events-none glass-panel p-3 border-blue-500/40 animate-pulse bg-blue-950/20">
-                                <div className="text-blue-400 font-['Press_Start_2P'] text-[7px] tracking-widest text-center">
-                                    SPACE / CLICK TO LOCK
-                                </div>
-                            </div>
-                        )}
-                    </div>
 
                     {currentPlayer && (
                         <Scorecard frames={currentPlayer.frames} />
