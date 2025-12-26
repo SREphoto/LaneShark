@@ -256,7 +256,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.beginPath(); ctx.ellipse(-3, -8, 4, 8, Math.PI / 6, 0, Math.PI * 2); ctx.fill();
 
         ctx.restore();
-        ctx.restore();
     };
 
     const drawSweeper = (ctx: CanvasRenderingContext2D, y: number) => {
@@ -272,6 +271,47 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillStyle = '#cecece';
         ctx.fillRect((CANVAS_WIDTH - LANE_WIDTH) / 2 - 30, y - 200, 10, 200);
         ctx.fillRect((CANVAS_WIDTH - LANE_WIDTH) / 2 + LANE_WIDTH + 20, y - 200, 10, 200);
+        ctx.restore();
+    };
+
+    const drawBallReturn = (ctx: CanvasRenderingContext2D) => {
+        const trackX = 20; // Left side
+        const trackW = 28;
+
+        ctx.save();
+        // Base Shadow
+        ctx.shadowBlur = 10; ctx.shadowColor = '#000';
+        ctx.fillStyle = '#111';
+        ctx.fillRect(trackX - trackW / 2, 0, trackW, CANVAS_HEIGHT);
+        ctx.shadowBlur = 0;
+
+        // Metal Rails (Chrome effect)
+        const grad = ctx.createLinearGradient(trackX - trackW / 2, 0, trackX + trackW / 2, 0);
+        grad.addColorStop(0, '#2d3436');
+        grad.addColorStop(0.1, '#636e72');
+        grad.addColorStop(0.4, '#dfe6e9'); // Highlight
+        grad.addColorStop(0.6, '#636e72');
+        grad.addColorStop(1, '#2d3436');
+        ctx.fillStyle = grad;
+        ctx.fillRect(trackX - trackW / 2 + 2, 0, trackW - 4, CANVAS_HEIGHT);
+
+        // Track Details (Rollers/Segments)
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        for (let y = 0; y < CANVAS_HEIGHT; y += 50) {
+            ctx.fillRect(trackX - trackW / 2 + 4, y, trackW - 8, 2);
+        }
+
+        // Ball Return Hood (Bottom)
+        if (gameState !== 'ROLLING') {
+            ctx.fillStyle = '#2d3436';
+            ctx.beginPath();
+            ctx.roundRect(trackX - 20, BALL_START_Y - 40, 40, 100, 10);
+            ctx.fill();
+            // Opening
+            ctx.fillStyle = '#111';
+            ctx.beginPath(); ctx.arc(trackX, BALL_START_Y + 20, 16, 0, Math.PI * 2); ctx.fill();
+        }
+
         ctx.restore();
     };
 
@@ -341,6 +381,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         woodGrad.addColorStop(1, '#63442a');
         ctx.fillStyle = woodGrad;
         ctx.fillRect(laneX, 0, LANE_WIDTH, CANVAS_HEIGHT);
+
+        drawBallReturn(ctx);
 
         drawReflections(ctx);
 

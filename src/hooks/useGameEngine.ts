@@ -125,8 +125,8 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         for (let i = 0; i < 6; i++) {
             specs.push({
                 id: i,
-                x: 15 + Math.random() * 20, // Left side (0-40 range)
-                y: 10 + i * 25 + Math.random() * 5, // Vertically distributed
+                x: 5 + Math.random() * 20, // Left side (5-25 range), clear of gutter (25-70)
+                y: 10 + i * 25 + Math.random() * 5,
                 color: colors[i % colors.length],
                 state: 'IDLE',
                 animOffset: Math.random() * 100
@@ -137,7 +137,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         for (let i = 6; i < 12; i++) {
             specs.push({
                 id: i,
-                x: CANVAS_WIDTH - 35 + Math.random() * 20, // Right side
+                x: CANVAS_WIDTH - 25 + Math.random() * 20, // Right side (375-395), clear of gutter (330-375)
                 y: 10 + (i - 6) * 25 + Math.random() * 5,
                 color: colors[i % colors.length],
                 state: 'IDLE',
