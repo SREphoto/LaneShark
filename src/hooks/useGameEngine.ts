@@ -119,17 +119,32 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         window.addEventListener('resize', checkMobile);
 
         const specs: Spectator[] = [];
-        const colors = ['#e53e3e', '#3182ce', '#38a169', '#d69e2e', '#805ad5'];
-        for (let i = 0; i < 12; i++) {
+        const colors = ['#e53e3e', '#3182ce', '#38a169', '#d69e2e', '#805ad5', '#d35400', '#8e44ad', '#2980b9'];
+
+        // Left Side Grandstand
+        for (let i = 0; i < 6; i++) {
             specs.push({
                 id: i,
-                x: 30 + (i % 6) * 65 + (Math.random() * 5),
-                y: 40 + Math.floor(i / 6) * 35 + (Math.random() * 5),
+                x: 15 + Math.random() * 20, // Left side (0-40 range)
+                y: 10 + i * 25 + Math.random() * 5, // Vertically distributed
                 color: colors[i % colors.length],
                 state: 'IDLE',
                 animOffset: Math.random() * 100
             });
         }
+
+        // Right Side Grandstand
+        for (let i = 6; i < 12; i++) {
+            specs.push({
+                id: i,
+                x: CANVAS_WIDTH - 35 + Math.random() * 20, // Right side
+                y: 10 + (i - 6) * 25 + Math.random() * 5,
+                color: colors[i % colors.length],
+                state: 'IDLE',
+                animOffset: Math.random() * 100
+            });
+        }
+
         spectatorsRef.current = specs;
         setSpectators(specs);
         return () => window.removeEventListener('resize', checkMobile);
