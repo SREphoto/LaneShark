@@ -390,19 +390,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             ctx.restore();
         });
 
-        ctx.fillStyle = '#0a0a0a';
-        ctx.fillRect(0, 0, CANVAS_WIDTH, 115);
-        const mGrad = ctx.createLinearGradient(60, 30, 340, 30);
-        mGrad.addColorStop(0, '#1e272e'); mGrad.addColorStop(0.5, '#485460'); mGrad.addColorStop(1, '#1e272e');
-        ctx.fillStyle = mGrad;
-        ctx.beginPath(); ctx.roundRect(65, 30, 270, 50, 20); ctx.fill();
-        ctx.strokeStyle = '#0fbcf9'; ctx.lineWidth = 3; ctx.stroke();
 
-        ctx.fillStyle = '#0fbcf9'; ctx.font = '7px "Press Start 2P"';
-        ctx.textAlign = 'center';
-        ctx.shadowBlur = 8; ctx.shadowColor = '#0fbcf9';
-        ctx.fillText("LANESHARK PREMIER AI", CANVAS_WIDTH / 2, 60);
-        ctx.shadowBlur = 0;
 
         pins.forEach(p => drawPin(ctx, p));
 
