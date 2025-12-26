@@ -66,7 +66,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
 
             {/* Credit */}
             <div className={`absolute bottom-20 text-[8px] text-gray-600 font-['Press_Start_2P'] tracking-widest transition-opacity duration-1000 delay-1000 ${stage >= 1 ? 'opacity-100' : 'opacity-0'}`}>
-                POWERED BY GOOGLE GEMINI AI
+                Created and Designed by Samuel R Erwin III
             </div>
 
             {/* Loading Indicator Overlay */}
