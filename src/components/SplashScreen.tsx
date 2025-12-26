@@ -90,66 +90,65 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
                 <p className="text-[9px] text-gray-500 font-['Press_Start_2P'] uppercase">Created & Designed by</p>
                 <p className="text-[10px] text-emerald-400 font-['Press_Start_2P']">Samuel R Erwin III</p>
             </div>
-        </div>
 
-            {/* Info Button */ }
-    <button
-        onClick={handleOpenCredits}
-        className="absolute bottom-8 right-8 z-[200] w-10 h-10 rounded-full border border-white/20 bg-black/40 text-white font-['Press_Start_2P'] text-[10px] hover:bg-white/10 hover:scale-110 transition-all flex items-center justify-center pointer-events-auto"
-    >
-        ?
-    </button>
+            {/* Info Button */}
+            <button
+                onClick={handleOpenCredits}
+                className="absolute bottom-8 right-8 z-[200] w-10 h-10 rounded-full border border-white/20 bg-black/40 text-white font-['Press_Start_2P'] text-[10px] hover:bg-white/10 hover:scale-110 transition-all flex items-center justify-center pointer-events-auto"
+            >
+                ?
+            </button>
 
-    {/* Credits Modal */ }
-    {
-        showCredits && (
-            <div className="absolute inset-0 z-[300] bg-black/95 flex items-center justify-center p-6 animate-fade-in" onClick={(e) => e.stopPropagation()}>
-                <div className="max-w-md w-full border border-white/20 bg-[#0f0c29] p-8 rounded-2xl shadow-2xl relative">
-                    <button
-                        onClick={handleCloseCredits}
-                        className="absolute top-4 right-4 text-red-500 hover:scale-125 transition-transform"
-                    >
-                        ✕
-                    </button>
+            {/* Credits Modal */}
+            {
+                showCredits && (
+                    <div className="absolute inset-0 z-[300] bg-black/95 flex items-center justify-center p-6 animate-fade-in" onClick={(e) => e.stopPropagation()}>
+                        <div className="max-w-md w-full border border-white/20 bg-[#0f0c29] p-8 rounded-2xl shadow-2xl relative">
+                            <button
+                                onClick={handleCloseCredits}
+                                className="absolute top-4 right-4 text-red-500 hover:scale-125 transition-transform"
+                            >
+                                ✕
+                            </button>
 
-                    <h2 className="text-2xl font-['Press_Start_2P'] text-center mb-8 gradient-text">CREDITS</h2>
+                            <h2 className="text-2xl font-['Press_Start_2P'] text-center mb-8 gradient-text">CREDITS</h2>
 
-                    <div className="space-y-8 text-center">
-                        <div>
-                            <p className="text-[8px] text-gray-500 mb-2 uppercase tracking-widest">Lead Developer & Designer</p>
-                            <p className="text-sm text-white font-['Press_Start_2P'] text-shadow">Samuel R Erwin III</p>
-                        </div>
+                            <div className="space-y-8 text-center">
+                                <div>
+                                    <p className="text-[8px] text-gray-500 mb-2 uppercase tracking-widest">Lead Developer & Designer</p>
+                                    <p className="text-sm text-white font-['Press_Start_2P'] text-shadow">Samuel R Erwin III</p>
+                                </div>
 
-                        <div>
-                            <p className="text-[8px] text-gray-500 mb-2 uppercase tracking-widest">AI Architect & Co-Pilot</p>
-                            <p className="text-sm text-blue-400 font-['Press_Start_2P'] text-shadow">Antigravity</p>
-                        </div>
+                                <div>
+                                    <p className="text-[8px] text-gray-500 mb-2 uppercase tracking-widest">AI Architect & Co-Pilot</p>
+                                    <p className="text-sm text-blue-400 font-['Press_Start_2P'] text-shadow">Antigravity</p>
+                                </div>
 
-                        <div className="pt-4 border-t border-white/10">
-                            <p className="text-[8px] text-gray-600 italic">
-                                "Redefining the digital bowling experience."
-                            </p>
+                                <div className="pt-4 border-t border-white/10">
+                                    <p className="text-[8px] text-gray-600 italic">
+                                        "Redefining the digital bowling experience."
+                                    </p>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleCloseCredits}
+                                className="w-full mt-8 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-[10px] font-['Press_Start_2P'] transition-colors"
+                            >
+                                CLOSE
+                            </button>
                         </div>
                     </div>
+                )
+            }
 
-                    <button
-                        onClick={handleCloseCredits}
-                        className="w-full mt-8 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-[10px] font-['Press_Start_2P'] transition-colors"
-                    >
-                        CLOSE
-                    </button>
-                </div>
+            {/* Loading Indicator Overlay */}
+            <div className="absolute bottom-10 left-10 right-10 h-1 loader-track">
+                <div
+                    className="loader-fill"
+                    style={{ width: stage >= 1 ? '100%' : '0%' }}
+                />
             </div>
-        )
-    }
-
-    {/* Loading Indicator Overlay */ }
-    <div className="absolute bottom-10 left-10 right-10 h-1 loader-track">
-        <div
-            className="loader-fill"
-            style={{ width: stage >= 1 ? '100%' : '0%' }}
-        />
-    </div>
         </div >
     );
 };
