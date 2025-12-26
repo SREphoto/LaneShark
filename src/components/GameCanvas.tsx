@@ -73,19 +73,28 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         const canvas = canvasRef.current;
         if (!canvas || !onClickBowler) return;
 
+        // Calculate Scale Factor (must match draw logic)
+        const scaleFactor = Math.min(canvas.width / CANVAS_WIDTH, canvas.height / CANVAS_HEIGHT, 1.0); // Cap at 1.0 or let it grow? Let's cap at 1.5 for BIG screens
+        // Actually, let's match the draw logic exactly.
+        const fitScale = Math.min(canvas.width / CANVAS_WIDTH, canvas.height / CANVAS_HEIGHT);
+
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        // Convert mouse to game coords
-        const offsetX = (canvas.width - CANVAS_WIDTH) / 2;
-        const offsetY = (canvas.height - CANVAS_HEIGHT) / 2;
-        const gameX = mouseX - offsetX;
-        const gameY = mouseY - offsetY;
+        // Reverse the transform
+        const scaledWidth = CANVAS_WIDTH * fitScale;
+        const scaledHeight = CANVAS_HEIGHT * fitScale;
+        const offsetX = (canvas.width - scaledWidth) / 2;
+        const offsetY = (canvas.height - scaledHeight) / 2;
+
+        const gameX = (mouseX - offsetX) / fitScale;
+        const gameY = (mouseY - offsetY) / fitScale;
 
         // Check if clicking near ball/bowler area (bottom center)
-        const dist = Math.sqrt(Math.pow(gameX - ball.x, 2) + Math.pow(gameY - (ball.y + 40), 2));
-        if (dist < 80) {
+        // Expanded hit area for easier clicking
+        const dist = Math.sqrt(Math.pow(gameX - ball.x, 2) + Math.pow(gameY - (ball.y + 30), 2));
+        if (dist < 100) {
             onClickBowler();
         }
     };
@@ -273,9 +282,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
         drawBackground(ctx, canvas.width, canvas.height);
 
-        const offsetX = (canvas.width - CANVAS_WIDTH) / 2 + (Math.random() - 0.5) * screenShake * 2;
-        const offsetY = (canvas.height - CANVAS_HEIGHT) / 2 + (Math.random() - 0.5) * screenShake * 2;
-        ctx.save(); ctx.translate(offsetX, offsetY);
+        const fitScale = Math.min(canvas.width / CANVAS_WIDTH, canvas.height / CANVAS_HEIGHT);
+
+        const offsetX = (canvas.width - CANVAS_WIDTH * fitScale) / 2 + (Math.random() - 0.5) * screenShake * 2;
+        const offsetY = (canvas.height - CANVAS_HEIGHT * fitScale) / 2 + (Math.random() - 0.5) * screenShake * 2;
+
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(fitScale, fitScale);
 
         const time = Date.now() / 1500;
         const neonGlow = Math.abs(Math.sin(time)) * 25 + 15;
@@ -327,6 +341,25 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillRect(laneX, 0, LANE_WIDTH, CANVAS_HEIGHT);
 
         drawReflections(ctx);
+
+        // --- Foul Line & Approach ---
+        const foulLineY = BALL_START_Y - 20;
+
+        // Foul Line
+        ctx.fillStyle = '#000';
+        ctx.fillRect(laneX, foulLineY, LANE_WIDTH, 5);
+
+        // Approach (Area below foul line)
+        ctx.fillStyle = '#dcdde1'; // Lighter wood/composite for approach
+        ctx.fillRect(laneX, foulLineY + 5, LANE_WIDTH, CANVAS_HEIGHT - (foulLineY + 5));
+
+        // Approach Dots
+        ctx.fillStyle = '#2f3640';
+        for (let i = 1; i <= 7; i++) {
+            ctx.beginPath();
+            ctx.arc(laneX + (LANE_WIDTH / 8) * i, foulLineY + 50, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
         ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1;
         for (let i = 1; i <= 15; i++) {
@@ -417,11 +450,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         if (!['SPLASH', 'MENU', 'PLAYER_CREATOR'].includes(gameState)) {
             const isPreparing = (gameState === 'READY_TO_BOWL' || gameState === 'THROW_SEQUENCE');
             if (isPreparing) {
-                // Draw bowler ON the approach (visually correct Y-offset)
-                drawBowler(ctx, ball.x, ball.y + 25, true, gameState, ball.angle);
+                // Draw bowler on the APPROACH (behind foul line)
+                drawBowler(ctx, ball.x, ball.y + 45, true, gameState, ball.angle);
             } else if (gameState === 'ROLLING' && ball.y > BALL_START_Y - 200) {
                 // Ensure bowler stays visible briefly after throw
-                drawBowler(ctx, ball.x, BALL_START_Y + 25, false, gameState, ball.angle);
+                drawBowler(ctx, ball.x, BALL_START_Y + 45, false, gameState, ball.angle);
             }
 
             ctx.save();

@@ -37,6 +37,7 @@ function LaneSharkGame() {
     // UI State
     const [isShopOpen, setIsShopOpen] = useState(false);
     const [showBallSettings, setShowBallSettings] = useState(false);
+    const [showScorecard, setShowScorecard] = useState(false);
 
     const game = useGameEngine({
         assets
@@ -323,6 +324,16 @@ function LaneSharkGame() {
 
                                 {isBowlReady && !currentPlayer?.isCpu && (
                                     <div className="flex gap-2 mt-1">
+                                        {/* Scorecard Toggle */}
+                                        <button
+                                            onClick={() => setShowScorecard(!showScorecard)}
+                                            className={`p-2 rounded-lg border transition-all hover:scale-110 active:scale-95 ${showScorecard
+                                                ? 'bg-purple-600 border-white text-white shadow-lg'
+                                                : 'bg-black/40 border-white/20 text-gray-400 hover:bg-white/10'}`}
+                                            title="Toggle Scorecard"
+                                        >
+                                            📋
+                                        </button>
                                         <button
                                             onClick={() => setShowBallSettings(!showBallSettings)}
                                             className={`p-2 rounded-lg border transition-all hover:scale-110 active:scale-95 ${showBallSettings
@@ -343,108 +354,107 @@ function LaneSharkGame() {
                                     </div>
                                 )}
                             </div>
+
+                            {/* 2. Bottom Area: Intentionally empty for bowler interaction and scorecard visibility */}
+                            <div className="pointer-events-none h-24 w-full" />
                         </div>
 
-                        {/* 2. Bottom Area: Intentionally empty for bowler interaction and scorecard visibility */}
-                        <div className="pointer-events-none h-24 w-full" />
-                    </div>
-
-                    <GameCanvas
-                        canvasRef={game.canvasRef}
-                        ball={game.ball}
-                        pins={game.pins}
-                        trail={game.trail}
-                        particles={game.particles}
-                        gameState={game.currentGameState}
-                        ballImage={assets.ballImageRef.current}
-                        spectators={game.spectators}
-                        laneCondition={game.laneCondition}
-                        isZoomed={game.isZoomed}
-                        equippedOutfitId={inventory.profile?.equippedOutfitId}
-                        aimOscillation={game.aimOscillation}
-                        powerOscillation={game.powerOscillation}
-                        throwStep={game.throwStep}
-                        showAimLine={game.throwStep === 'AIM' || (currentPlayer?.isCpu && isBowlReady)}
-                        screenShake={game.screenShake}
-                        onClickBowler={() => {
-                            if (isBowlReady && !currentPlayer?.isCpu) {
-                                game.startThrowSequence();
-                            }
-                        }}
-                    />
-
-                    {isShopOpen && (
-                        <Shop
-                            inventory={inventory}
-                            onBuy={handleBuyItem}
-                            onEquip={handleEquipItem}
-                            onCheatMoney={game.cheatMoney}
-                            onClose={() => setIsShopOpen(false)}
-                        />
-                    )}
-
-                    {showBallSettings && (
-                        <div className="absolute inset-0 z-[60] flex items-center justify-center p-4">
-                            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowBallSettings(false)} />
-                            <div className="relative animate-scale-in">
-                                <BallControls
-                                    spin={game.userSpin}
-                                    weight={game.userWeight}
-                                    material={game.userMaterial}
-                                    laneCondition={game.laneCondition}
-                                    inventory={inventory}
-                                    onSpinChange={game.setUserSpin}
-                                    onWeightChange={game.setUserWeight}
-                                    onMaterialChange={game.setUserMaterial}
-                                    onLaneConditionChange={game.setLaneCondition}
-                                    onClose={() => setShowBallSettings(false)}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {showTutorial && (
-                        <TutorialOverlay
-                            step={game.tutorialStep}
-                            onNext={() => {
-                                if (game.tutorialStep < TUTORIAL_STEPS.length - 1) {
-                                    game.advanceTutorial();
-                                } else {
-                                    game.endTutorial();
+                        <GameCanvas
+                            canvasRef={game.canvasRef}
+                            ball={game.ball}
+                            pins={game.pins}
+                            trail={game.trail}
+                            particles={game.particles}
+                            gameState={game.currentGameState}
+                            ballImage={assets.ballImageRef.current}
+                            spectators={game.spectators}
+                            laneCondition={game.laneCondition}
+                            isZoomed={game.isZoomed}
+                            equippedOutfitId={inventory.profile?.equippedOutfitId}
+                            aimOscillation={game.aimOscillation}
+                            powerOscillation={game.powerOscillation}
+                            throwStep={game.throwStep}
+                            showAimLine={game.throwStep === 'AIM' || (currentPlayer?.isCpu && isBowlReady)}
+                            screenShake={game.screenShake}
+                            onClickBowler={() => {
+                                if (isBowlReady && !currentPlayer?.isCpu) {
+                                    game.startThrowSequence();
                                 }
                             }}
-                            onSkip={game.endTutorial}
                         />
-                    )}
 
-                    {game.currentGameState === 'GAME_OVER' && !game.showLevelUp && (
-                        <StatisticsScreen
-                            stats={{
-                                totalScore: game.players[0].score,
-                                strikes: game.players[0].frames.filter(f => f.isStrike).length,
-                                spares: game.players[0].frames.filter(f => f.isSpare).length,
-                                gutters: game.players[0].rolls.filter(r => r === 0).length,
-                                openFrames: game.players[0].frames.filter(f => !f.isStrike && !f.isSpare && f.rolls.length === 2 && f.rolls[0] + f.rolls[1] < 10).length,
-                                totalPins: game.players[0].rolls.reduce((a, b) => a + b, 0),
-                                accuracy: (game.players[0].rolls.filter(r => r > 0).length / Math.max(1, game.players[0].rolls.length)) * 100
-                            }}
-                            profile={game.players[0].profile}
-                            onClose={() => game.setCurrentGameState('MENU')}
-                        />
-                    )}
+                        {isShopOpen && (
+                            <Shop
+                                inventory={inventory}
+                                onBuy={handleBuyItem}
+                                onEquip={handleEquipItem}
+                                onCheatMoney={game.cheatMoney}
+                                onClose={() => setIsShopOpen(false)}
+                            />
+                        )}
+
+                        {showBallSettings && (
+                            <div className="absolute inset-0 z-[60] flex items-center justify-center p-4">
+                                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowBallSettings(false)} />
+                                <div className="relative animate-scale-in">
+                                    <BallControls
+                                        spin={game.userSpin}
+                                        weight={game.userWeight}
+                                        material={game.userMaterial}
+                                        laneCondition={game.laneCondition}
+                                        inventory={inventory}
+                                        onSpinChange={game.setUserSpin}
+                                        onWeightChange={game.setUserWeight}
+                                        onMaterialChange={game.setUserMaterial}
+                                        onLaneConditionChange={game.setLaneCondition}
+                                        onClose={() => setShowBallSettings(false)}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {showTutorial && (
+                            <TutorialOverlay
+                                step={game.tutorialStep}
+                                onNext={() => {
+                                    if (game.tutorialStep < TUTORIAL_STEPS.length - 1) {
+                                        game.advanceTutorial();
+                                    } else {
+                                        game.endTutorial();
+                                    }
+                                }}
+                                onSkip={game.endTutorial}
+                            />
+                        )}
+
+                        {game.currentGameState === 'GAME_OVER' && !game.showLevelUp && (
+                            <StatisticsScreen
+                                stats={{
+                                    totalScore: game.players[0].score,
+                                    strikes: game.players[0].frames.filter(f => f.isStrike).length,
+                                    spares: game.players[0].frames.filter(f => f.isSpare).length,
+                                    gutters: game.players[0].rolls.filter(r => r === 0).length,
+                                    openFrames: game.players[0].frames.filter(f => !f.isStrike && !f.isSpare && f.rolls.length === 2 && f.rolls[0] + f.rolls[1] < 10).length,
+                                    totalPins: game.players[0].rolls.reduce((a, b) => a + b, 0),
+                                    accuracy: (game.players[0].rolls.filter(r => r > 0).length / Math.max(1, game.players[0].rolls.length)) * 100
+                                }}
+                                profile={game.players[0].profile}
+                                onClose={() => game.setCurrentGameState('MENU')}
+                            />
+                        )}
 
 
 
-                    {currentPlayer && (
-                        <Scorecard frames={currentPlayer.frames} />
-                    )}
+                        {currentPlayer && showScorecard && (
+                            <Scorecard frames={currentPlayer.frames} />
+                        )}
 
-                    <ImpactMessage message={game.impactEffectText} isVisible={game.showImpactEffect} />
-                </div>
+                        <ImpactMessage message={game.impactEffectText} isVisible={game.showImpactEffect} />
+                    </div>
             )}
-        </div>
-    );
+                </div>
+            );
 }
 
 const LaneSharkGameRoot = () => <LaneSharkGame />;
-export default LaneSharkGameRoot;
+            export default LaneSharkGameRoot;
