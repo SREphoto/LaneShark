@@ -417,9 +417,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         if (!['SPLASH', 'MENU', 'PLAYER_CREATOR'].includes(gameState)) {
             const isPreparing = (gameState === 'READY_TO_BOWL' || gameState === 'THROW_SEQUENCE');
             if (isPreparing) {
-                drawBowler(ctx, ball.x, ball.y + 40, true, gameState, ball.angle);
-            } else if (gameState === 'ROLLING' && ball.y > BALL_START_Y - 250) {
-                drawBowler(ctx, ball.x, BALL_START_Y + 40, false, gameState, ball.angle);
+                // Draw bowler ON the approach (visually correct Y-offset)
+                drawBowler(ctx, ball.x, ball.y + 25, true, gameState, ball.angle);
+            } else if (gameState === 'ROLLING' && ball.y > BALL_START_Y - 200) {
+                // Ensure bowler stays visible briefly after throw
+                drawBowler(ctx, ball.x, BALL_START_Y + 25, false, gameState, ball.angle);
             }
 
             ctx.save();

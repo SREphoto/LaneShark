@@ -588,10 +588,19 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         });
     }, []);
 
+    // Calculate XP Progress for UI
+    const scorePlayer = players[0];
+    const currentXp = scorePlayer?.profile?.xp || 0;
+    const currentLevel = scorePlayer?.profile?.level || 1;
+    const nextLevelXp = LEVELS[currentLevel] || 999999;
+    const prevLevelXp = LEVELS[currentLevel - 1] || 0;
+    const xpProgress = Math.min(100, Math.max(0, ((currentXp - prevLevelXp) / (nextLevelXp - prevLevelXp)) * 100));
+
+
     return {
         currentGameState, setCurrentGameState, throwStep, nextThrowStep, setThrowStep, gameMode, players, currentPlayerIdx, ball, pins, trail, particles, spectators, message, impactEffectText, showImpactEffect, showLevelUp, setShowLevelUp, isMobile, isZoomed,
         userWeight, userSpin, userMaterial, laneCondition, setUserWeight, setUserSpin, setUserMaterial, setLaneCondition,
-        aimOscillation, powerOscillation,
+        aimOscillation, powerOscillation, xpProgress, nextLevelXp,
         startGame, startThrowSequence, rollBall, cheatMoney,
         updateProfile: (p: PlayerProfile) => { const inv = loadProgress(); inv.profile = p; saveProgress(inv); },
         setBallPosition: (x: number) => {

@@ -173,8 +173,17 @@ function LaneSharkGame() {
                         <div className="flex items-center gap-6">
                             <div className="flex flex-col items-end">
                                 <span className="text-[8px] font-['Press_Start_2P'] text-emerald-400 mb-1">${inventory.money.toLocaleString()}</span>
-                                <div className="h-1 w-24 bg-white/10 rounded-full overflow-hidden">
+                                <div className="h-1 w-24 bg-white/10 rounded-full overflow-hidden mb-1">
                                     <div className="h-full bg-emerald-500 shadow-emerald-glow" style={{ width: '100%' }} />
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="text-[6px] font-['Press_Start_2P'] text-yellow-400">LVL {inventory.profile?.level || 1}</span>
+                                    <div className="h-1 w-16 bg-white/10 rounded-full overflow-hidden" title={`XP: ${inventory.profile?.xp} / ${game.nextLevelXp}`}>
+                                        <div
+                                            className="h-full bg-yellow-400 shadow-gold-glow transition-all duration-1000"
+                                            style={{ width: `${game.xpProgress}%` }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <button
@@ -301,13 +310,24 @@ function LaneSharkGame() {
                                     </span>
                                 </div>
 
+                                {/* HUD XP Bar */}
+                                <div className="flex items-center gap-2 px-2 py-1 glass-panel border border-yellow-500/30 rounded-lg">
+                                    <span className="text-[6px] font-['Press_Start_2P'] text-yellow-200">LVL {inventory.profile?.level || 1}</span>
+                                    <div className="h-1.5 w-20 bg-black/40 rounded-full overflow-hidden relative">
+                                        <div
+                                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-600 to-yellow-300 shadow-gold-glow transition-all duration-700 ease-out"
+                                            style={{ width: `${game.xpProgress}%` }}
+                                        />
+                                    </div>
+                                </div>
+
                                 {isBowlReady && !currentPlayer?.isCpu && (
                                     <div className="flex gap-2 mt-1">
                                         <button
                                             onClick={() => setShowBallSettings(!showBallSettings)}
                                             className={`p-2 rounded-lg border transition-all hover:scale-110 active:scale-95 ${showBallSettings
-                                                    ? 'bg-yellow-600 border-white text-white shadow-gold-glow'
-                                                    : 'bg-black/40 border-white/20 text-gray-400 hover:bg-white/10'
+                                                ? 'bg-yellow-600 border-white text-white shadow-gold-glow'
+                                                : 'bg-black/40 border-white/20 text-gray-400 hover:bg-white/10'
                                                 }`}
                                             title="Settings"
                                         >
