@@ -45,7 +45,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
                 <div className="absolute w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
 
                 {/* Main Title */}
-                <div className="relative mb-4 flex flex-col items-center">
+                <div className="relative mb-4 flex flex-col items-center bloom chromatic-aberration">
                     <h1 className="text-6xl font-['Press_Start_2P'] text-white tracking-tighter shadow-2xl">
                         LANE
                     </h1>
@@ -55,7 +55,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
                 </div>
 
                 {/* Subtitle */}
-                <div className="flex items-center gap-4 mt-8">
+                <div className="flex items-center gap-4 mt-8 animate-pulse">
                     <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/50" />
                     <div className="text-[10px] text-gray-400 font-['Press_Start_2P'] uppercase tracking-[0.3em]">
                         Bowling Evolution
@@ -70,9 +70,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
             </div>
 
             {/* Loading Indicator Overlay */}
-            <div className="absolute bottom-10 left-0 w-full h-1 bg-white/5">
+            <div className="absolute bottom-10 left-10 right-10 h-1 loader-track">
                 <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-[3000ms] ease-linear"
+                    className="loader-fill"
                     style={{ width: stage >= 1 ? '100%' : '0%' }}
                 />
             </div>

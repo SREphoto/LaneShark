@@ -16,7 +16,7 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
     return (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/60" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }} />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
 
             <div className="relative w-full max-w-lg glass-card p-10 flex flex-col items-center animate-slide-up">
                 <div className="mb-8 text-center">

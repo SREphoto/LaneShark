@@ -151,6 +151,8 @@ function LaneSharkGame() {
                 />
             )}
 
+            <div className="crt-overlay" />
+
             {game.currentGameState === 'PLAYER_CREATOR' && (
                 <PlayerCreator onComplete={handlePlayerCreated} />
             )}
@@ -196,6 +198,7 @@ function LaneSharkGame() {
                         spectators={game.spectators}
                         laneCondition={game.laneCondition}
                         equippedOutfitId={inventory.profile?.equippedOutfitId}
+                        screenShake={game.screenShake}
                     />
 
                     {inventory.profile && (
@@ -306,6 +309,7 @@ function LaneSharkGame() {
                         powerOscillation={game.powerOscillation}
                         throwStep={game.throwStep}
                         showAimLine={game.throwStep === 'AIM' || (currentPlayer?.isCpu && isBowlReady)}
+                        screenShake={game.screenShake}
                     />
 
                     {isShopOpen && (

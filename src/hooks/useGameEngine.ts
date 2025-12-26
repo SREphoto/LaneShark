@@ -53,6 +53,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
     const [userMaterial, setUserMaterial] = useState<BallMaterial>('PLASTIC');
     const [laneCondition, setLaneCondition] = useState<LaneCondition>('NORMAL');
     const [tutorialStep, setTutorialStep] = useState<number>(-1);
+    const [screenShake, setScreenShake] = useState(0);
 
     const currentPlayer = players[currentPlayerIdx];
 
@@ -170,13 +171,15 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
     const spawnImpactParticles = (x: number, y: number, count: number = 10, color: string = '#fff') => {
         const newParticles: Particle[] = [];
+        const colors = ['#ffffff', '#0fbcf9', '#f53b57', '#ffd32a', '#05c46b'];
         for (let i = 0; i < count; i++) {
+            const pColor = color === '#fff' ? colors[Math.floor(Math.random() * colors.length)] : color;
             newParticles.push({
                 x, y,
-                vx: (Math.random() - 0.5) * 12,
-                vy: (Math.random() - 0.5) * 12,
-                life: 1.0,
-                color
+                vx: (Math.random() - 0.5) * 16,
+                vy: (Math.random() - 0.5) * 16 - 5, // Upward bias
+                life: 0.8 + Math.random() * 0.4,
+                color: pColor
             });
         }
         particlesRef.current = [...particlesRef.current, ...newParticles];
@@ -326,6 +329,9 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
                     pin.vy = ((pin.y - ball.y) / PIN_COLLISION_RADIUS) * force - 8;
                     pin.va = (Math.random() - 0.5) * 15.0 + (ball.spin * 20);
 
+                    // Add Screenshake
+                    setScreenShake(prev => Math.min(15, prev + force * 0.5));
+
                     spawnImpactParticles(pin.x, pin.y, 15, '#fff');
                     if (!soundPlayedThisFrame) {
                         try { assets.pinHitSoundRef.current?.play().catch(() => { }); } catch (e) { }
@@ -364,6 +370,8 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             if (p.life > 0) activeParticles.push(p);
         }
         particlesRef.current = activeParticles;
+
+        if (screenShake > 0) setScreenShake(prev => Math.max(0, prev * 0.9));
 
         setBall({ ...ballRef.current });
         setPins([...pinsRef.current]);
@@ -455,6 +463,9 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
             p1.profile = { ...p1.profile, xp: (p1.profile.xp || 0) + xpGain };
             p1.inventory = { ...p1.inventory, money: (p1.inventory.money || 0) + moneyGain };
+
+            if (eventType === 'strike') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 80, '#ffd32a');
+            else if (eventType === 'spare') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 40, '#0fbcf9');
 
             // Check Level Up
             const currentLevel = p1.profile.level;
@@ -593,6 +604,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             setBall({ ...ballRef.current });
         },
         tutorialStep, advanceTutorial: () => setTutorialStep(prev => prev + 1), endTutorial: () => { setTutorialStep(-1); setCurrentGameState('READY_TO_BOWL'); },
+        screenShake,
         canvasRef
     };
 }

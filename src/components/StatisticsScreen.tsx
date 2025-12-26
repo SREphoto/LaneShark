@@ -19,7 +19,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ stats, profile, onC
             <div className="relative w-full max-w-lg glass-card p-10 flex flex-col animate-slide-up bg-[#1a1a2e]/60 border-2 border-yellow-500/30">
 
                 {/* Header */}
-                <div className="text-center mb-10">
+                <div className="text-center mb-10 bloom chromatic-aberration">
                     <h2 className="text-4xl font-['Press_Start_2P'] gradient-text mb-2 tracking-tighter">
                         TOURNAMENT RESULTS
                     </h2>

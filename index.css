@@ -44,6 +44,10 @@
     --blur-md: blur(16px);
     --blur-lg: blur(24px);
 
+    /* Cinematic Effects */
+    --bloom-filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 15px currentColor);
+    --chromatic-aberration: 1.5px 0 1px rgba(255, 0, 0, 0.5), -1.5px 0 1px rgba(0, 0, 255, 0.5);
+
     /* Spacing */
     --space-xs: 0.25rem;
     --space-sm: 0.5rem;
@@ -973,6 +977,28 @@ canvas {
     box-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
 }
 
+.crt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.15;
+}
+
+.glass-panel {
+    background: rgba(15, 12, 41, 0.7);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
 .animate-scale-in {
     animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -1003,4 +1029,32 @@ canvas {
         opacity: 1;
         transform: translateX(0);
     }
+}
+
+/* Loading Bar Logic */
+.loader-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.loader-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #a855f7);
+    transition: width 3s linear;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+}
+
+.bloom {
+    filter: var(--bloom-filter);
+}
+
+.chromatic-aberration {
+    text-shadow: var(--chromatic-aberration);
+}
+
+.game-canvas-element {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
