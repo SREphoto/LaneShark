@@ -28,11 +28,12 @@ interface GameCanvasProps {
     powerOscillation?: number;
     throwStep?: string;
     screenShake?: number;
+    onClickBowler?: () => void;
 }
 
 const GameCanvas: React.FC<GameCanvasProps> = ({
     canvasRef, ball, pins, trail, particles, gameState, ballImage, spectators = [], laneCondition = 'NORMAL', isZoomed = false, equippedOutfitId, showAimLine = false,
-    aimOscillation = 0, powerOscillation = 0.8, throwStep = 'POSITION', screenShake = 0
+    aimOscillation = 0, powerOscillation = 0.8, throwStep = 'POSITION', screenShake = 0, onClickBowler
 }) => {
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
@@ -67,6 +68,27 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         window.addEventListener('resize', updateSize);
         return () => window.removeEventListener('resize', updateSize);
     }, [canvasRef]);
+
+    const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas || !onClickBowler) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // Convert mouse to game coords
+        const offsetX = (canvas.width - CANVAS_WIDTH) / 2;
+        const offsetY = (canvas.height - CANVAS_HEIGHT) / 2;
+        const gameX = mouseX - offsetX;
+        const gameY = mouseY - offsetY;
+
+        // Check if clicking near ball/bowler area (bottom center)
+        const dist = Math.sqrt(Math.pow(gameX - ball.x, 2) + Math.pow(gameY - (ball.y + 40), 2));
+        if (dist < 80) {
+            onClickBowler();
+        }
+    };
 
     const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
         const bgGrad = ctx.createRadialGradient(width / 2, height / 2, 100, width / 2, height / 2, width);
@@ -438,7 +460,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.restore();
     }, [ball, pins, trail, particles, gameState, ballImage, spectators, laneCondition, isZoomed, scuffs, equippedOutfitId, showAimLine, aimOscillation, powerOscillation, throwStep, screenShake]);
 
-    return <canvas ref={canvasRef} className="game-canvas-element" />;
+    return <canvas ref={canvasRef} className="game-canvas-element" onClick={handleCanvasClick} />;
 };
 
 export default GameCanvas;

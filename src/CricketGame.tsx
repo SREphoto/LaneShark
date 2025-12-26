@@ -199,6 +199,7 @@ function LaneSharkGame() {
                         laneCondition={game.laneCondition}
                         equippedOutfitId={inventory.profile?.equippedOutfitId}
                         screenShake={game.screenShake}
+                        onClickBowler={() => handleModeSelect('SOLO')}
                     />
 
                     {inventory.profile && (
@@ -310,6 +311,11 @@ function LaneSharkGame() {
                         throwStep={game.throwStep}
                         showAimLine={game.throwStep === 'AIM' || (currentPlayer?.isCpu && isBowlReady)}
                         screenShake={game.screenShake}
+                        onClickBowler={() => {
+                            if (isBowlReady && !currentPlayer?.isCpu) {
+                                game.startThrowSequence();
+                            }
+                        }}
                     />
 
                     {isShopOpen && (
@@ -384,13 +390,7 @@ function LaneSharkGame() {
                             </div>
                         )}
 
-                        {isBowlReady && !currentPlayer?.isCpu && (
-                            <div className="pointer-events-auto glass-panel p-3 border-yellow-500/20 animate-fade-in group hover:scale-105 transition-all cursor-pointer" onClick={() => game.startThrowSequence()}>
-                                <div className="text-yellow-500 font-['Press_Start_2P'] text-[7px] tracking-widest text-center">
-                                    CLICK TO BOWL
-                                </div>
-                            </div>
-                        )}
+                        {/* Click to bowl replaced by direct bowler click */}
 
                         {isThrowing && (
                             <div className="pointer-events-none glass-panel p-3 border-blue-500/40 animate-pulse bg-blue-950/20">
