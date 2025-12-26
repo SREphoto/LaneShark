@@ -357,10 +357,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
         particles.forEach(p => {
             ctx.save();
-            ctx.globalAlpha = p.life;
+            const safeLife = Math.max(0, p.life);
+            ctx.globalAlpha = safeLife;
             ctx.shadowBlur = 10; ctx.shadowColor = p.color;
             ctx.fillStyle = p.color;
-            ctx.beginPath(); ctx.arc(p.x, p.y, 3 * p.life, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, 3 * safeLife), 0, Math.PI * 2); ctx.fill();
             ctx.restore();
         });
 

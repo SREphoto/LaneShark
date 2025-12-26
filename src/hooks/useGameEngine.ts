@@ -404,7 +404,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
     }, [currentGameState, currentPlayer, rollBall]);
 
     useEffect(() => {
-        if (['SPLASH', 'MENU', 'PLAYER_CREATOR', 'READY_TO_BOWL', 'GAME_OVER', 'TUTORIAL'].includes(currentGameState)) return;
+        if (['SPLASH', 'MENU', 'PLAYER_CREATOR', 'GAME_OVER'].includes(currentGameState)) return;
         const loop = () => {
             updatePhysics();
             if (currentGameState === 'ROLLING' && ballRef.current.y < -150) {
