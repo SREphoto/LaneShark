@@ -451,10 +451,11 @@ function LaneSharkGame() {
 
                         <ImpactMessage message={game.impactEffectText} isVisible={game.showImpactEffect} />
                     </div>
-            )}
                 </div>
-            );
+            )}
+        </div>
+    );
 }
 
 const LaneSharkGameRoot = () => <LaneSharkGame />;
-            export default LaneSharkGameRoot;
+export default LaneSharkGameRoot;
