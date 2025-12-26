@@ -139,7 +139,12 @@ const Shop: React.FC<ShopProps> = ({ inventory, onBuy, onEquip, onCheatMoney, on
                                             <h3 className="text-[11px] font-['Press_Start_2P'] text-yellow-400 leading-tight group-hover:text-yellow-300">
                                                 {item.name}
                                             </h3>
-                                            {isEquipped && <span className="text-[7px] font-['Press_Start_2P'] bg-blue-600 text-white px-1.5 py-0.5 rounded">EQUIPPED</span>}
+                                            {isEquipped && (
+                                                <div className="flex items-center gap-1 bg-blue-600/20 border border-blue-500/50 px-2 py-1 rounded text-blue-300">
+                                                    <span className="text-[8px] animate-pulse">●</span>
+                                                    <span className="text-[7px] font-['Press_Start_2P']">EQUIPPED</span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <p className="text-[9px] font-['Press_Start_2P'] text-gray-500 mb-3 leading-relaxed h-10 overflow-hidden">

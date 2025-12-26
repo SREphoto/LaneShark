@@ -159,7 +159,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             detailType = outfits[equippedOutfitId].d;
         }
 
-        const flicker = Math.random() > 0.99 ? 0.4 : 1.0;
+        const flicker = 1.0; // Removed jittery flicker
         ctx.globalAlpha = flicker;
 
         const torsoGrad = ctx.createLinearGradient(-22, -65, 22, -20);
@@ -247,6 +247,23 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.beginPath(); ctx.ellipse(-3, -8, 4, 8, Math.PI / 6, 0, Math.PI * 2); ctx.fill();
 
         ctx.restore();
+        ctx.restore();
+    };
+
+    const drawSweeper = (ctx: CanvasRenderingContext2D, y: number) => {
+        // Draw the mechanical sweeper bar
+        ctx.save();
+        ctx.shadowBlur = 10; ctx.shadowColor = '#000';
+        ctx.fillStyle = '#2d3436';
+        ctx.fillRect((CANVAS_WIDTH - LANE_WIDTH) / 2 - 20, y, LANE_WIDTH + 40, 20);
+        ctx.fillStyle = '#636e72';
+        ctx.fillRect((CANVAS_WIDTH - LANE_WIDTH) / 2 - 20, y + 5, LANE_WIDTH + 40, 10);
+
+        // Hydraulic arms
+        ctx.fillStyle = '#cecece';
+        ctx.fillRect((CANVAS_WIDTH - LANE_WIDTH) / 2 - 30, y - 200, 10, 200);
+        ctx.fillRect((CANVAS_WIDTH - LANE_WIDTH) / 2 + LANE_WIDTH + 20, y - 200, 10, 200);
+        ctx.restore();
     };
 
     useEffect(() => {
@@ -289,6 +306,16 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillStyle = '#050505';
         ctx.fillRect(laneX - GUTTER_WIDTH, 0, GUTTER_WIDTH, CANVAS_HEIGHT);
         ctx.fillRect(rightGutterX, 0, GUTTER_WIDTH, CANVAS_HEIGHT);
+
+        // Pin Deck (Dark Box Area)
+        ctx.fillStyle = '#1e1e1e';
+        ctx.fillRect(laneX, 0, LANE_WIDTH, 150); // Dark area behind pins
+
+        // Header / Masking Unit Shadow
+        ctx.shadowBlur = 50; ctx.shadowColor = '#000';
+        ctx.fillStyle = '#000';
+        ctx.fillRect(laneX, 0, LANE_WIDTH, 50);
+        ctx.shadowBlur = 0;
 
         const woodGrad = ctx.createLinearGradient(laneX, 0, rightGutterX, 0);
         woodGrad.addColorStop(0, '#63442a');
@@ -456,7 +483,16 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 ctx.fillText("PWR", 14, 145);
             }
             ctx.restore();
+            ctx.restore();
         }
+
+        // Sweeper Animation
+        if (gameState === 'PIN_SETTLEMENT' || gameState === 'SWEEPING' as any) {
+            const time = Date.now();
+            const sweepY = Math.abs(Math.sin(time / 500)) * 100; // Oscillate for effect
+            drawSweeper(ctx, sweepY);
+        }
+
         ctx.restore();
     }, [ball, pins, trail, particles, gameState, ballImage, spectators, laneCondition, isZoomed, scuffs, equippedOutfitId, showAimLine, aimOscillation, powerOscillation, throwStep, screenShake]);
 
