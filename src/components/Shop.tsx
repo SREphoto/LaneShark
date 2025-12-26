@@ -46,7 +46,7 @@ const Shop: React.FC<ShopProps> = ({ inventory, onBuy, onEquip, onCheatMoney, on
     const activePreviewId = previewItemId || inventory.profile?.equippedOutfitId;
 
     return (
-        <div className="absolute inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in bg-black/80 backdrop-blur-xl">
+        <div className="absolute inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in bg-black/80 backdrop-blur-xl pointer-events-auto">
             {/* Backdrop Click */}
             <div className="absolute inset-0" onClick={onClose} />
 

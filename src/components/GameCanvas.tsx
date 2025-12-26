@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { Ball, Pin, GameState, Particle, Spectator } from '../types';
 import {
     CANVAS_WIDTH, CANVAS_HEIGHT, LANE_WIDTH, LANE_COLOR, LANE_BORDER_COLOR,
@@ -37,6 +37,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 }) => {
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
+    const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
+
     // Procedural Lane Scuffs & Wood Knots
     const scuffs = useMemo(() => {
         const items = [];
@@ -62,6 +64,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             ctxRef.current = canvas.getContext('2d', { alpha: false });
+            setDimensions({ width: window.innerWidth, height: window.innerHeight });
         };
 
         updateSize();
@@ -77,11 +80,17 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
+        // Calculate scale to fit content within window
+        const scale = Math.min(canvas.width / CANVAS_WIDTH, canvas.height / CANVAS_HEIGHT);
+        const scaledWidth = CANVAS_WIDTH * scale;
+        const scaledHeight = CANVAS_HEIGHT * scale;
+
         // Convert mouse to game coords
-        const offsetX = (canvas.width - CANVAS_WIDTH) / 2;
-        const offsetY = (canvas.height - CANVAS_HEIGHT) / 2;
-        const gameX = mouseX - offsetX;
-        const gameY = mouseY - offsetY;
+        const offsetX = (canvas.width - scaledWidth) / 2;
+        const offsetY = (canvas.height - scaledHeight) / 2;
+
+        const gameX = (mouseX - offsetX) / scale;
+        const gameY = (mouseY - offsetY) / scale;
 
         // Check if clicking near ball/bowler area (bottom center)
         const dist = Math.sqrt(Math.pow(gameX - ball.x, 2) + Math.pow(gameY - (ball.y + 40), 2));
@@ -273,11 +282,16 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
         drawBackground(ctx, canvas.width, canvas.height);
 
-        const offsetX = (canvas.width - CANVAS_WIDTH) / 2 + (Math.random() - 0.5) * screenShake * 2;
-        const offsetY = (canvas.height - CANVAS_HEIGHT) / 2 + (Math.random() - 0.5) * screenShake * 2;
+        const scale = Math.min(canvas.width / CANVAS_WIDTH, canvas.height / CANVAS_HEIGHT);
+        const scaledWidth = CANVAS_WIDTH * scale;
+        const scaledHeight = CANVAS_HEIGHT * scale;
+
+        const offsetX = (canvas.width - scaledWidth) / 2 + (Math.random() - 0.5) * screenShake * 2;
+        const offsetY = (canvas.height - scaledHeight) / 2 + (Math.random() - 0.5) * screenShake * 2;
 
         ctx.save();
         ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
 
         const time = Date.now() / 1500;
         const neonGlow = Math.abs(Math.sin(time)) * 25 + 15;
@@ -496,7 +510,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         }
 
         ctx.restore();
-    }, [ball, pins, trail, particles, gameState, ballImage, spectators, laneCondition, isZoomed, scuffs, equippedOutfitId, showAimLine, aimOscillation, powerOscillation, throwStep, screenShake]);
+    }, [ball, pins, trail, particles, gameState, ballImage, spectators, laneCondition, isZoomed, scuffs, equippedOutfitId, showAimLine, aimOscillation, powerOscillation, throwStep, screenShake, dimensions]);
 
     return <canvas ref={canvasRef} className="game-canvas-element" onClick={handleCanvasClick} />;
 };

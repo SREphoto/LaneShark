@@ -15,7 +15,7 @@ interface StatisticsScreenProps {
 
 const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ stats, profile, onClose }) => {
     return (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 animate-fade-in bg-black/80 backdrop-blur-xl">
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 animate-fade-in bg-black/80 backdrop-blur-xl pointer-events-auto">
             <div className="relative w-full max-w-lg glass-card p-10 flex flex-col animate-slide-up bg-[#1a1a2e]/60 border-2 border-yellow-500/30">
 
                 {/* Header */}
