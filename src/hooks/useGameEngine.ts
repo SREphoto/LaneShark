@@ -127,24 +127,24 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         const specs: Spectator[] = [];
         const colors = ['#e53e3e', '#3182ce', '#38a169', '#d69e2e', '#805ad5', '#d35400', '#8e44ad', '#2980b9'];
 
-        // Left Side Grandstand
+        // Left Side Grandstand (Near Bowler)
         for (let i = 0; i < 6; i++) {
             specs.push({
                 id: i,
-                x: 5 + Math.random() * 20, // Left side (5-25 range), clear of gutter (25-70)
-                y: 10 + i * 25 + Math.random() * 5,
+                x: 10 + Math.random() * 30, // Left side (10-40), strictly outside gutter
+                y: 450 + i * 25 + Math.random() * 5, // Y ranges 450-600 (Bowler is at 530)
                 color: colors[i % colors.length],
                 state: 'IDLE',
                 animOffset: Math.random() * 100
             });
         }
 
-        // Right Side Grandstand
+        // Right Side Grandstand (Near Bowler)
         for (let i = 6; i < 12; i++) {
             specs.push({
                 id: i,
-                x: CANVAS_WIDTH - 25 + Math.random() * 20, // Right side (375-395), clear of gutter (330-375)
-                y: 10 + (i - 6) * 25 + Math.random() * 5,
+                x: CANVAS_WIDTH - 40 + Math.random() * 30, // Right side (360-390)
+                y: 450 + (i - 6) * 25 + Math.random() * 5,
                 color: colors[i % colors.length],
                 state: 'IDLE',
                 animOffset: Math.random() * 100

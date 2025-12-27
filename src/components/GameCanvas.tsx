@@ -147,6 +147,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillStyle = 'rgba(0,0,0,0.4)';
         ctx.beginPath(); ctx.ellipse(0, 15, 35 * shadowScale, 15, 0, 0, Math.PI * 2); ctx.fill();
 
+        // Bowler Position & Animation State
         const animY = isRolling ? Math.abs(Math.sin(time / 120)) * 6 : 0;
         ctx.translate(0, -animY);
 
@@ -171,77 +172,83 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             detailType = outfits[equippedOutfitId].d;
         }
 
-        const flicker = 1.0; // Removed jittery flicker
-        ctx.globalAlpha = flicker;
+        // --- PIXEL ART SPRITE RENDERING ---
+        // Scale factor for pixels
+        const S = 4; // 1 pixel = 4 units
 
-        const torsoGrad = ctx.createLinearGradient(-22, -65, 22, -20);
-        torsoGrad.addColorStop(0, primaryColor);
-        torsoGrad.addColorStop(1, '#000');
-        ctx.fillStyle = torsoGrad;
-        ctx.beginPath(); ctx.roundRect(-24, -68, 48, 48, 12); ctx.fill();
+        // Helper to draw a "pixel" rect
+        const drawRect = (x: number, y: number, w: number, h: number, color: string) => {
+            ctx.fillStyle = color;
+            ctx.fillRect(x * S, y * S, w * S, h * S);
+        };
 
-        if (detailType === 'NEON') {
-            ctx.shadowBlur = 12; ctx.shadowColor = accentColor;
-            ctx.strokeStyle = accentColor; ctx.lineWidth = 2;
-            ctx.strokeRect(-20, -64, 40, 40);
+        // 1. LEGS
+        // Left Leg
+        drawRect(-4, -10, 3, 10, '#1a1a1a'); // Dark pants
+        // Right Leg
+        drawRect(1, -10, 3, 10, '#1a1a1a');
+
+        // Shoes
+        drawRect(-4, 0, 3, 2, '#333');
+        drawRect(1, 0, 3, 2, '#333');
+
+        // 2. TORSO (Body)
+        // Main block
+        drawRect(-5, -22, 10, 12, primaryColor);
+
+        // Shirt Detail
+        if (detailType === 'STRIPES') {
+            drawRect(-3, -22, 2, 12, accentColor);
+            drawRect(1, -22, 2, 12, accentColor);
+        } else if (detailType === 'NEON') {
+            ctx.shadowBlur = 10; ctx.shadowColor = accentColor;
+            drawRect(-2, -18, 4, 4, accentColor); // chest glow
             ctx.shadowBlur = 0;
         } else if (detailType === 'TUX') {
-            ctx.fillStyle = '#fff';
-            ctx.beginPath(); ctx.moveTo(0, -68); ctx.lineTo(-18, -68); ctx.lineTo(0, -35); ctx.lineTo(18, -68); ctx.closePath(); ctx.fill();
+            drawRect(-2, -22, 4, 12, '#fff'); // Shirt front
+            drawRect(-1, -20, 2, 1, '#aa0000'); // Bowtie / button
         }
 
-        // --- Accessories ---
-        // 1. Gold Chain (Championship Ring effect or just bling)
-        if (equippedItems.includes('championship_ring')) {
-            ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(0, -68, 14, 0, Math.PI); ctx.stroke();
-        }
-
-        // Head
-        ctx.fillStyle = '#ffdbac';
-        ctx.beginPath(); ctx.arc(0, -85, 20, 0, Math.PI * 2); ctx.fill();
-
-        // Hair / Headgear
-        if (equippedItems.includes('headband')) {
-            ctx.fillStyle = '#ef4444'; // Red headband
-            ctx.fillRect(-21, -95, 42, 8);
-        } else {
-            ctx.fillStyle = '#2d3436';
-            ctx.beginPath(); ctx.arc(0, -92, 20, Math.PI, 0); ctx.fill();
-        }
-
-        // Face
-        if (equippedItems.includes('sunglasses')) {
-            ctx.fillStyle = '#111';
-            ctx.beginPath(); ctx.roundRect(-14, -88, 28, 10, 2); ctx.fill();
-            ctx.fillStyle = 'rgba(255,255,255,0.4)'; // Reflection
-            ctx.beginPath(); ctx.moveTo(-10, -88); ctx.lineTo(-4, -78); ctx.closePath(); ctx.fill();
-        } else {
-            ctx.fillStyle = '#000';
-            const blink = Math.sin(time / 600) > 0.98 ? 0.1 : 1.0;
-            ctx.beginPath(); ctx.ellipse(-8, -85, 3, 3 * blink, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.ellipse(8, -85, 3, 3 * blink, 0, 0, Math.PI * 2); ctx.fill();
-        }
-
-        // Wrist Guard / Gloves
+        // 3. ARMS
         if (isHoldingBall) {
-            if (equippedItems.includes('power_glove')) {
-                ctx.fillStyle = '#333';
-                ctx.fillRect(20, -40, 15, 20); // Hand pos
-                ctx.fillStyle = '#00ff00'; // LED
-                ctx.fillRect(22, -38, 4, 4);
-            } else if (equippedItems.includes('wrist_guard')) {
-                ctx.fillStyle = '#444';
-                ctx.fillRect(22, -45, 12, 12);
-            }
+            // Holding ball pose
+            drawRect(-8, -20, 3, 8, primaryColor); // Left arm down
+            drawRect(5, -20, 6, 3, primaryColor); // Right arm forward holding ball
+            drawRect(11, -20, 2, 2, '#ffdbac'); // Hand
+        } else {
+            // Idle / Swing pose
+            const swing = Math.sin(time / 200) * 2;
+            drawRect(-8, -20 + swing, 3, 9, primaryColor);
+            drawRect(5, -20 - swing, 3, 9, primaryColor);
         }
 
-        // Lucky Aura
-        if (equippedItems.includes('golden_dice') || equippedItems.includes('golden_slippers')) {
-            if (Math.random() > 0.8) {
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath(); ctx.arc((Math.random() - 0.5) * 50, -60 + (Math.random() - 0.5) * 60, 2, 0, Math.PI * 2); ctx.fill();
-            }
+        // 4. HEAD
+        drawRect(-4, -30, 8, 8, '#ffdbac'); // Skin
+
+        // Hair / Hat
+        if (equippedItems.includes('headband')) {
+            drawRect(-4, -28, 8, 2, '#ef4444');
+        } else {
+            drawRect(-4, -30, 8, 2, '#2d3436'); // Hair top
+            drawRect(-4, -28, 2, 2, '#2d3436'); // Sideburns
+            drawRect(2, -28, 2, 2, '#2d3436');
+        }
+
+        // Sunglasses / Eyes
+        if (equippedItems.includes('sunglasses')) {
+            drawRect(-3, -26, 6, 2, '#111');
+        } else {
+            drawRect(-2, -26, 1, 1, '#000'); // Left Eye
+            drawRect(1, -26, 1, 1, '#000'); // Right Eye
+        }
+
+        // 5. ACCESSORIES (Pixelated)
+        if (equippedItems.includes('championship_ring')) {
+            drawRect(11, -19, 2, 2, '#ffd700'); // Ring on hand
+        }
+        if (equippedItems.includes('power_glove') && isHoldingBall) {
+            drawRect(10, -21, 4, 4, '#333');
+            drawRect(11, -20, 1, 1, '#0f0'); // LED
         }
 
         ctx.restore();
