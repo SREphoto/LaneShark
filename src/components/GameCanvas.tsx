@@ -23,7 +23,9 @@ interface GameCanvasProps {
     laneCondition?: 'NORMAL' | 'DRY' | 'OILY';
     isZoomed?: boolean;
     equippedOutfitId?: string;
+    equippedItems?: string[];
     showAimLine?: boolean;
+
     aimOscillation?: number;
     powerOscillation?: number;
     throwStep?: string;
@@ -32,9 +34,10 @@ interface GameCanvasProps {
 }
 
 const GameCanvas: React.FC<GameCanvasProps> = ({
-    canvasRef, ball, pins, trail, particles, gameState, ballImage, spectators = [], laneCondition = 'NORMAL', isZoomed = false, equippedOutfitId, showAimLine = false,
+    canvasRef, ball, pins, trail, particles, gameState, ballImage, spectators = [], laneCondition = 'NORMAL', isZoomed = false, equippedOutfitId, equippedItems = [], showAimLine = false,
     aimOscillation = 0, powerOscillation = 0.8, throwStep = 'POSITION', screenShake = 0, onClickBowler
 }) => {
+
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
     const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -187,17 +190,62 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             ctx.beginPath(); ctx.moveTo(0, -68); ctx.lineTo(-18, -68); ctx.lineTo(0, -35); ctx.lineTo(18, -68); ctx.closePath(); ctx.fill();
         }
 
+        // --- Accessories ---
+        // 1. Gold Chain (Championship Ring effect or just bling)
+        if (equippedItems.includes('championship_ring')) {
+            ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(0, -68, 14, 0, Math.PI); ctx.stroke();
+        }
+
+        // Head
         ctx.fillStyle = '#ffdbac';
         ctx.beginPath(); ctx.arc(0, -85, 20, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#2d3436';
-        ctx.beginPath(); ctx.arc(0, -92, 20, Math.PI, 0); ctx.fill();
 
-        ctx.fillStyle = '#000';
-        const blink = Math.sin(time / 600) > 0.98 ? 0.1 : 1.0;
-        ctx.beginPath(); ctx.ellipse(-8, -85, 3, 3 * blink, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(8, -85, 3, 3 * blink, 0, 0, Math.PI * 2); ctx.fill();
+        // Hair / Headgear
+        if (equippedItems.includes('headband')) {
+            ctx.fillStyle = '#ef4444'; // Red headband
+            ctx.fillRect(-21, -95, 42, 8);
+        } else {
+            ctx.fillStyle = '#2d3436';
+            ctx.beginPath(); ctx.arc(0, -92, 20, Math.PI, 0); ctx.fill();
+        }
+
+        // Face
+        if (equippedItems.includes('sunglasses')) {
+            ctx.fillStyle = '#111';
+            ctx.beginPath(); ctx.roundRect(-14, -88, 28, 10, 2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; // Reflection
+            ctx.beginPath(); ctx.moveTo(-10, -88); ctx.lineTo(-4, -78); ctx.closePath(); ctx.fill();
+        } else {
+            ctx.fillStyle = '#000';
+            const blink = Math.sin(time / 600) > 0.98 ? 0.1 : 1.0;
+            ctx.beginPath(); ctx.ellipse(-8, -85, 3, 3 * blink, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(8, -85, 3, 3 * blink, 0, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Wrist Guard / Gloves
+        if (isHoldingBall) {
+            if (equippedItems.includes('power_glove')) {
+                ctx.fillStyle = '#333';
+                ctx.fillRect(20, -40, 15, 20); // Hand pos
+                ctx.fillStyle = '#00ff00'; // LED
+                ctx.fillRect(22, -38, 4, 4);
+            } else if (equippedItems.includes('wrist_guard')) {
+                ctx.fillStyle = '#444';
+                ctx.fillRect(22, -45, 12, 12);
+            }
+        }
+
+        // Lucky Aura
+        if (equippedItems.includes('golden_dice') || equippedItems.includes('golden_slippers')) {
+            if (Math.random() > 0.8) {
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath(); ctx.arc((Math.random() - 0.5) * 50, -60 + (Math.random() - 0.5) * 60, 2, 0, Math.PI * 2); ctx.fill();
+            }
+        }
 
         ctx.restore();
+
     };
 
     const drawReflections = (ctx: CanvasRenderingContext2D) => {
@@ -275,42 +323,83 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     };
 
     const drawBallReturn = (ctx: CanvasRenderingContext2D) => {
-        const trackX = 20; // Left side
-        const trackW = 28;
+        const trackX = 20;
+        const trackW = 32;
 
         ctx.save();
-        // Base Shadow
-        ctx.shadowBlur = 10; ctx.shadowColor = '#000';
-        ctx.fillStyle = '#111';
-        ctx.fillRect(trackX - trackW / 2, 0, trackW, CANVAS_HEIGHT);
+        // Base Unit (Floor Level) - The "Ball Return Machine"
+        const machineY = BALL_START_Y - 40;
+        const machineH = 120;
+        const machineW = 50;
+
+        const machineGrad = ctx.createLinearGradient(trackX - machineW / 2, machineY, trackX + machineW / 2, machineY);
+        machineGrad.addColorStop(0, '#1a1a1a');
+        machineGrad.addColorStop(0.5, '#454545');
+        machineGrad.addColorStop(1, '#1a1a1a');
+        ctx.fillStyle = machineGrad;
+        ctx.beginPath();
+        ctx.roundRect(trackX - machineW / 2, machineY, machineW, machineH, 12);
+        ctx.fill();
+
+        // Metallic Rim
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // The Return Hole
+        ctx.fillStyle = '#050505';
+        ctx.beginPath();
+        ctx.arc(trackX, machineY + 35, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#0fbcf9';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Neon Accents on Machine
+        ctx.shadowBlur = 10; ctx.shadowColor = '#0fbcf9';
+        ctx.fillStyle = '#0fbcf9';
+        ctx.fillRect(trackX - machineW / 2 + 5, machineY + 80, machineW - 10, 3);
         ctx.shadowBlur = 0;
 
-        // Metal Rails (Chrome effect)
-        const grad = ctx.createLinearGradient(trackX - trackW / 2, 0, trackX + trackW / 2, 0);
-        grad.addColorStop(0, '#2d3436');
-        grad.addColorStop(0.1, '#636e72');
-        grad.addColorStop(0.4, '#dfe6e9'); // Highlight
-        grad.addColorStop(0.6, '#636e72');
-        grad.addColorStop(1, '#2d3436');
-        ctx.fillStyle = grad;
-        ctx.fillRect(trackX - trackW / 2 + 2, 0, trackW - 4, CANVAS_HEIGHT);
+        // Tracks leading up the lane
+        ctx.fillStyle = '#222';
+        ctx.fillRect(trackX - 10, 0, 20, machineY);
 
-        // Track Details (Rollers/Segments)
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        for (let y = 0; y < CANVAS_HEIGHT; y += 50) {
-            ctx.fillRect(trackX - trackW / 2 + 4, y, trackW - 8, 2);
+        const railsGrad = ctx.createLinearGradient(trackX - 10, 0, trackX + 10, 0);
+        railsGrad.addColorStop(0, '#444');
+        railsGrad.addColorStop(0.4, '#aaa');
+        railsGrad.addColorStop(0.6, '#aaa');
+        railsGrad.addColorStop(1, '#444');
+        ctx.fillStyle = railsGrad;
+        ctx.fillRect(trackX - 8, 0, 3, machineY); // Left Rail
+        ctx.fillRect(trackX + 5, 0, 3, machineY); // Right Rail
+
+        // Rollers
+        ctx.fillStyle = '#111';
+        for (let y = 0; y < machineY; y += 60) {
+            ctx.fillRect(trackX - 6, y, 12, 4);
         }
 
-        // Ball Return Hood (Bottom)
-        if (gameState !== 'ROLLING') {
-            ctx.fillStyle = '#2d3436';
-            ctx.beginPath();
-            ctx.roundRect(trackX - 20, BALL_START_Y - 40, 40, 100, 10);
-            ctx.fill();
-            // Opening
-            ctx.fillStyle = '#111';
-            ctx.beginPath(); ctx.arc(trackX, BALL_START_Y + 20, 16, 0, Math.PI * 2); ctx.fill();
-        }
+        // --- Side Wall Monitor (Information Display) ---
+        const monitorY = 400;
+        ctx.fillStyle = '#0a0a0c';
+        ctx.beginPath();
+        ctx.roundRect(5, monitorY, 70, 90, 8);
+        ctx.fill();
+        ctx.strokeStyle = '#4c51bf';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Monitor Content
+        ctx.fillStyle = 'rgba(76, 81, 191, 0.15)';
+        ctx.fillRect(10, monitorY + 5, 60, 80);
+        ctx.font = '8px "Press Start 2P"';
+        ctx.fillStyle = '#0fbcf9';
+        ctx.fillText("LANE 1", 15, monitorY + 25);
+        ctx.fillStyle = '#fff';
+        ctx.fillText("AUTO", 15, monitorY + 45);
+        ctx.fillStyle = '#f53b57';
+        ctx.fillText("PRO", 15, monitorY + 65);
 
         ctx.restore();
     };
@@ -436,29 +525,76 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
         pins.forEach(p => drawPin(ctx, p));
 
-        // Tapering Neon Trail
+        // Tapering Neon Trail with Electric Effect
         if (gameState === 'ROLLING' && trail.length > 2) {
             ctx.save();
             ctx.globalCompositeOperation = 'screen';
-            for (let i = 0; i < trail.length; i++) {
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Core Trail
+            ctx.beginPath();
+            trail.forEach((p, i) => {
+                const opacity = (i / trail.length);
+                const width = (i / trail.length) * ball.radius * 0.6;
+                if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
+            });
+            ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
+            ctx.lineWidth = ball.radius * 0.4;
+            ctx.stroke();
+
+            // Electric Arcs
+            ctx.shadowBlur = 15; ctx.shadowColor = '#00f2ff';
+            for (let i = 2; i < trail.length; i += 2) {
                 const p = trail[i];
-                const opacity = (i / trail.length) * 0.4;
-                const size = (i / trail.length) * ball.radius * 0.8;
-                ctx.fillStyle = `rgba(59, 130, 246, ${opacity})`;
-                ctx.beginPath(); ctx.arc(p.x, p.y, size, 0, Math.PI * 2); ctx.fill();
+                const prev = trail[i - 1];
+                const opacity = (i / trail.length);
+                if (Math.random() > 0.3) continue;
+
+                ctx.beginPath();
+                ctx.moveTo(prev.x + (Math.random() - 0.5) * 10, prev.y);
+                ctx.lineTo(p.x + (Math.random() - 0.5) * 10, p.y);
+                ctx.strokeStyle = `rgba(180, 240, 255, ${opacity * 0.8})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
             }
             ctx.restore();
         }
 
+        // Advanced Particle System
         particles.forEach(p => {
             ctx.save();
             const safeLife = Math.max(0, p.life);
             ctx.globalAlpha = safeLife;
+            ctx.translate(p.x, p.y);
+
+            // Rotate particles based on life for dynamic feel
+            ctx.rotate(safeLife * 10);
+
             ctx.shadowBlur = 10; ctx.shadowColor = p.color;
             ctx.fillStyle = p.color;
-            ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, 3 * safeLife), 0, Math.PI * 2); ctx.fill();
+
+            // Varied Shapes based on color/randomness (Simulated)
+            if (p.color === '#ffd32a' || p.color === '#eab308') {
+                // Gold/Sparkle (Star shape)
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * 5, Math.sin((18 + i * 72) * Math.PI / 180) * 5);
+                    ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * 2, Math.sin((54 + i * 72) * Math.PI / 180) * 2);
+                }
+                ctx.fill();
+            } else if (p.color === '#f53b57' || p.color.includes('red')) {
+                // Fire/Explosion (Jagged shard)
+                ctx.fillRect(-3, -3, 6, 6);
+            } else {
+                // Standard Dust/Smoke (Circle)
+                ctx.beginPath(); ctx.arc(0, 0, Math.max(0, 3 * safeLife), 0, Math.PI * 2); ctx.fill();
+            }
+
             ctx.restore();
         });
+
 
         if (!['SPLASH', 'MENU', 'PLAYER_CREATOR'].includes(gameState)) {
             const isPreparing = (gameState === 'READY_TO_BOWL' || gameState === 'THROW_SEQUENCE');

@@ -467,19 +467,76 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         const totalScore = tempFrames[tempFrames.length - 1]?.cumulativeScore || 0;
         const updatedPlayers = [...players];
 
-        // --- Reward Logic for Human P1 ---
+        // --- Enhanced Reward Logic for Human P1 ---
         let p1 = updatedPlayers[0];
         if (p1 && p1.id === 1 && p1.profile) {
+            // Track consecutive strikes for streak bonus
+            if (eventType === 'strike') {
+                p1.consecutiveStrikes = (p1.consecutiveStrikes || 0) + 1;
+            } else {
+                p1.consecutiveStrikes = 0;
+            }
+
+            // Base rewards
             let xpGain = knockedPins * XP_PER_PIN;
             let moneyGain = knockedPins * WINNINGS_PER_POINT;
 
+            // Event bonuses
             if (eventType === 'strike') { xpGain += XP_PER_STRIKE; moneyGain += 50; }
             else if (eventType === 'spare') { xpGain += XP_PER_SPARE; moneyGain += 20; }
 
+            // Streak Multiplier (for consecutive strikes)
+            const streakCount = p1.consecutiveStrikes;
+            let streakMultiplier = 1.0;
+            let streakName = '';
+            if (streakCount >= 2) {
+                const streakData: Record<number, { name: string; mult: number }> = {
+                    2: { name: 'Double!', mult: 1.5 },
+                    3: { name: 'Turkey!', mult: 2.0 },
+                    4: { name: 'Four-Bagger!', mult: 2.5 },
+                    5: { name: 'Five-Bagger!', mult: 3.0 },
+                    6: { name: 'Six-Pack!', mult: 3.5 },
+                    7: { name: 'Lucky Seven!', mult: 4.0 },
+                    8: { name: 'Octuple!', mult: 4.5 },
+                    9: { name: 'Golden Nine!', mult: 5.0 },
+                    10: { name: 'PERFECT TEN!', mult: 6.0 },
+                    11: { name: 'LEGENDARY!', mult: 8.0 },
+                    12: { name: 'PERFECT GAME!', mult: 10.0 }
+                };
+                const data = streakData[Math.min(streakCount, 12)];
+                if (data) {
+                    streakMultiplier = data.mult;
+                    streakName = data.name;
+                    setMessage(`🔥 ${data.name} 🔥`);
+                }
+            }
+
+            // Apply multiplier
+            xpGain = Math.floor(xpGain * streakMultiplier);
+            moneyGain = Math.floor(moneyGain * streakMultiplier);
+
+            // Crowd Control stat bonus (+5% per point)
+            const crowdBonus = 1 + ((p1.profile.stats?.crowdControl || 0) * 0.05);
+            xpGain = Math.floor(xpGain * crowdBonus);
+            moneyGain = Math.floor(moneyGain * crowdBonus);
+
+            // Update profile
             p1.profile = { ...p1.profile, xp: (p1.profile.xp || 0) + xpGain };
             p1.inventory = { ...p1.inventory, money: (p1.inventory.money || 0) + moneyGain };
 
-            if (eventType === 'strike') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 80, '#ffd32a');
+            // Update Lifetime Stats
+            const lifetimeStats = p1.inventory.lifetimeStats || {
+                totalStrikes: 0, totalSpares: 0, totalPinsKnocked: 0,
+                gamesPlayed: 0, highScore: 0, bestStreak: 0, perfectGames: 0
+            };
+            lifetimeStats.totalPinsKnocked += knockedPins;
+            if (eventType === 'strike') lifetimeStats.totalStrikes++;
+            if (eventType === 'spare') lifetimeStats.totalSpares++;
+            if (streakCount > lifetimeStats.bestStreak) lifetimeStats.bestStreak = streakCount;
+            p1.inventory.lifetimeStats = lifetimeStats;
+
+            // Particle effects
+            if (eventType === 'strike') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 80 + (streakCount * 10), '#ffd32a');
             else if (eventType === 'spare') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 40, '#0fbcf9');
 
             // Check Level Up
@@ -492,6 +549,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             }
             saveProgress(p1.inventory);
         }
+
 
         updatedPlayers[currentPlayerIdx] = { ...currentPlayer, rolls: newRolls, frames: tempFrames, score: totalScore };
         setPlayers(updatedPlayers);

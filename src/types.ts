@@ -146,11 +146,37 @@ export interface ShopItem {
     effectDescription: string;
 }
 
+export interface LifetimeStats {
+    totalStrikes: number;
+    totalSpares: number;
+    totalPinsKnocked: number;
+    gamesPlayed: number;
+    highScore: number;
+    bestStreak: number;
+    perfectGames: number;
+}
+
+export interface DailyChallengeProgress {
+    date: string; // ISO date string
+    strikesToday: number;
+    sparesToday: number;
+    pinsToday: number;
+    gamesToday: number;
+    highScoreToday: number;
+    completedChallenges: string[];
+}
+
 export interface UserInventory {
     money: number;
     items: string[];
-    profile?: PlayerProfile; // Persisted profile
+    profile?: PlayerProfile;
+    lifetimeStats?: LifetimeStats;
+    unlockedAchievements?: string[];
+    dailyProgress?: DailyChallengeProgress;
+    lastPlayedDate?: string;
+    loginStreak?: number;
 }
+
 
 export interface GameStatistics {
     totalScore: number;

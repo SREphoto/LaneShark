@@ -24,6 +24,8 @@ import SplashScreen from './components/SplashScreen';
 import ModeSelect from './components/ModeSelect';
 import PlayerCreator from './components/PlayerCreator';
 import LevelUpModal from './components/LevelUpModal';
+import ProgressionPanel from './components/ProgressionPanel';
+
 
 /**
  * LaneShark Bowling - Premium Evolution
@@ -38,6 +40,8 @@ function LaneSharkGame() {
     const [isShopOpen, setIsShopOpen] = useState(false);
     const [showBallSettings, setShowBallSettings] = useState(false);
     const [showScorecard, setShowScorecard] = useState(false);
+    const [showProgressionPanel, setShowProgressionPanel] = useState(false);
+
 
     const game = useGameEngine({
         assets
@@ -188,6 +192,13 @@ function LaneSharkGame() {
                                 </div>
                             </div>
                             <button
+                                onClick={() => setShowProgressionPanel(true)}
+                                className="btn-glass p-3 rounded-xl border border-purple-500/30 hover:scale-110 transition-transform hover:bg-purple-600/20"
+                                title="STATS & ACHIEVEMENTS"
+                            >
+                                📊
+                            </button>
+                            <button
                                 onClick={() => setIsShopOpen(true)}
                                 className="btn-glass p-3 rounded-xl border border-white/20 hover:scale-110 transition-transform"
                                 title="PRO SHOP"
@@ -195,6 +206,7 @@ function LaneSharkGame() {
                                 🎳
                             </button>
                         </div>
+
                     </div>
 
                     <GameCanvas
@@ -208,6 +220,8 @@ function LaneSharkGame() {
                         spectators={game.spectators}
                         laneCondition={game.laneCondition}
                         equippedOutfitId={inventory.profile?.equippedOutfitId}
+                        equippedItems={inventory.items}
+
                         screenShake={game.screenShake}
                         onClickBowler={() => handleModeSelect('SOLO')}
                     />
@@ -254,7 +268,15 @@ function LaneSharkGame() {
                             onClose={() => setIsShopOpen(false)}
                         />
                     )}
+
+                    {showProgressionPanel && (
+                        <ProgressionPanel
+                            inventory={inventory}
+                            onClose={() => setShowProgressionPanel(false)}
+                        />
+                    )}
                 </div>
+
             )}
 
             {game.currentGameState !== 'SPLASH' && game.currentGameState !== 'MENU' && game.currentGameState !== 'PLAYER_CREATOR' && (
@@ -311,14 +333,30 @@ function LaneSharkGame() {
                                     </span>
                                 </div>
 
-                                {/* HUD XP Bar */}
-                                <div className="flex items-center gap-2 px-2 py-1 glass-panel border border-yellow-500/30 rounded-lg">
-                                    <span className="text-[6px] font-['Press_Start_2P'] text-yellow-200">LVL {inventory.profile?.level || 1}</span>
-                                    <div className="h-1.5 w-20 bg-black/40 rounded-full overflow-hidden relative">
-                                        <div
-                                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-600 to-yellow-300 shadow-gold-glow transition-all duration-700 ease-out"
-                                            style={{ width: `${game.xpProgress}%` }}
-                                        />
+                                {/* HUD XP & Level Display */}
+                                <div className="flex flex-col items-end gap-1">
+                                    {/* Level Badge */}
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center border-2 border-white/50 shadow-lg shadow-yellow-500/30">
+                                            <span className="text-[8px] font-['Press_Start_2P'] text-white">{inventory.profile?.level || 1}</span>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-[6px] font-['Press_Start_2P'] text-yellow-200/80">LEVEL</span>
+                                            <span className="text-[8px] font-['Press_Start_2P'] text-yellow-400">{inventory.profile?.level || 1}</span>
+                                        </div>
+                                    </div>
+                                    {/* XP Bar */}
+                                    <div className="glass-panel px-2 py-1.5 border border-yellow-500/30 rounded-lg flex flex-col items-center gap-1">
+                                        <span className="text-[5px] font-['Press_Start_2P'] text-gray-400 uppercase">Experience</span>
+                                        <div className="h-2 w-24 bg-black/60 rounded-full overflow-hidden relative border border-white/10">
+                                            <div
+                                                className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-300 shadow-[0_0_10px_rgba(234,179,8,0.6)] transition-all duration-700 ease-out"
+                                                style={{ width: `${game.xpProgress}%` }}
+                                            />
+                                            {/* Shine effect */}
+                                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine" />
+                                        </div>
+                                        <span className="text-[5px] font-['Press_Start_2P'] text-gray-500">{inventory.profile?.xp || 0} / {game.nextLevelXp}</span>
                                     </div>
                                 </div>
 
