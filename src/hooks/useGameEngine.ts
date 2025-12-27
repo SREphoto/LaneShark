@@ -294,10 +294,17 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             trailRef.current.push({ x: ball.x, y: ball.y, speed: currentSpeed });
             if (trailRef.current.length > MAX_TRAIL_LENGTH) trailRef.current.shift();
         } else if (currentGameState === 'BALL_RETURN') {
-            const targetX = 30;
-            const targetY = BALL_START_Y + 20;
-            ball.x += (targetX - ball.x) * 0.1;
-            ball.y += (targetY - ball.y) * 0.05;
+            const returnTrackX = 20;
+            const returnExitY = BALL_START_Y;
+
+            // Phase 1: Move to left track (horizontal)
+            if (ball.x > returnTrackX + 5) {
+                ball.x += (returnTrackX - ball.x) * 0.1;
+            } else {
+                // Phase 2: In track, move down (vertical)
+                ball.x = returnTrackX;
+                ball.y += (returnExitY - ball.y) * 0.08 + 2;
+            }
             setIsZoomed(false);
         } else if (currentGameState === 'THROW_SEQUENCE') {
             if (throwStep === 'AIM') {

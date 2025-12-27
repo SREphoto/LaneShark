@@ -59,6 +59,50 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         return items;
     }, []);
 
+    // High-Fidelity Wood Texture (Cached)
+    const woodPattern = useMemo(() => {
+        if (typeof document === 'undefined') return null;
+        const c = document.createElement('canvas');
+        c.width = LANE_WIDTH;
+        c.height = 1024;
+        const ctx = c.getContext('2d');
+        if (!ctx) return null;
+
+        // Base Wood
+        const woodGradient = ctx.createLinearGradient(0, 0, LANE_WIDTH, 0);
+        woodGradient.addColorStop(0, '#eaccad');
+        woodGradient.addColorStop(0.2, '#d6a87c');
+        woodGradient.addColorStop(0.5, '#cba274');
+        woodGradient.addColorStop(0.8, '#d6a87c');
+        woodGradient.addColorStop(1, '#eaccad');
+        ctx.fillStyle = woodGradient;
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        // 39 Boards (Standard Bowling Lane)
+        const boardWidth = LANE_WIDTH / 39;
+        for (let i = 0; i < 39; i++) {
+            // Alternating slight shades
+            if (i % 2 === 0) {
+                ctx.fillStyle = 'rgba(0,0,0,0.03)';
+                ctx.fillRect(i * boardWidth, 0, boardWidth, c.height);
+            }
+
+            // Side gaps
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(i * boardWidth, 0, 1, c.height);
+
+            // Wood Grain Noise (Vertical streaks)
+            for (let j = 0; j < 10; j++) {
+                ctx.fillStyle = Math.random() > 0.5 ? 'rgba(74, 55, 40, 0.05)' : 'rgba(255,255,255,0.05)';
+                const streakW = 1 + Math.random() * 2;
+                const streakX = i * boardWidth + Math.random() * (boardWidth - streakW);
+                ctx.fillRect(streakX, 0, streakW, c.height);
+            }
+        }
+
+        return c;
+    }, []);
+
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -103,37 +147,52 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     };
 
     const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-        const bgGrad = ctx.createRadialGradient(width / 2, height / 2, 100, width / 2, height / 2, width);
-        bgGrad.addColorStop(0, '#16213e');
-        bgGrad.addColorStop(0.6, '#0f0c29');
-        bgGrad.addColorStop(1, '#050505');
+        // Deep Space / Arena Background
+        const bgGrad = ctx.createRadialGradient(width / 2, height / 3, 100, width / 2, height / 2, width);
+        bgGrad.addColorStop(0, '#1a1c29'); // Deep Blue-Grey center
+        bgGrad.addColorStop(0.4, '#11131f');
+        bgGrad.addColorStop(1, '#050505'); // Pitch black corners
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, width, height);
 
+        // Volumetric Spotlights (Animated)
+        const time = Date.now() / 3000;
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        const time = Date.now() / 4000;
-        for (let i = 0; i < 3; i++) {
-            const beamX = width / 2 + Math.sin(time + i) * 300;
-            const beamGrad = ctx.createLinearGradient(beamX, 0, beamX + 200, height);
-            beamGrad.addColorStop(0, `hsla(${200 + i * 40}, 80%, 50%, 0.05)`);
+
+        for (let i = 0; i < 4; i++) {
+            const angle = (Math.sin(time + i) * 0.2);
+            const x = width / 2 + (i - 1.5) * 300;
+
+            ctx.save();
+            ctx.translate(x, -50);
+            ctx.rotate(angle);
+
+            const beamGrad = ctx.createLinearGradient(0, 0, 0, height * 0.8);
+            beamGrad.addColorStop(0, `hsla(${210 + i * 20}, 70%, 60%, 0.15)`);
+            beamGrad.addColorStop(0.5, `hsla(${210 + i * 20}, 70%, 60%, 0.02)`);
             beamGrad.addColorStop(1, 'transparent');
+
             ctx.fillStyle = beamGrad;
             ctx.beginPath();
-            ctx.moveTo(beamX, 0); ctx.lineTo(beamX + 300, 0);
-            ctx.lineTo(beamX + 600, height); ctx.lineTo(beamX, height);
+            ctx.moveTo(-40, 0);
+            ctx.lineTo(40, 0);
+            ctx.lineTo(150, height);
+            ctx.lineTo(-150, height);
             ctx.fill();
+            ctx.restore();
+        }
+
+        // Ambient Particles (Dust motes in light)
+        ctx.fillStyle = '#fff';
+        for (let i = 0; i < 80; i++) {
+            const x = (Math.sin(i * 123.45 + time) * 0.5 + 0.5) * width;
+            const y = (Math.cos(i * 678.9 + time * 0.5) * 0.5 + 0.5) * height * 0.7;
+            const alpha = Math.sin(time * 2 + i) * 0.2 + 0.2;
+            ctx.globalAlpha = alpha;
+            ctx.beginPath(); ctx.arc(x, y, Math.random() * 1.5, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
-
-        ctx.fillStyle = '#fff';
-        for (let i = 0; i < 50; i++) {
-            const x = (Math.sin(i * 123.45) * 0.5 + 0.5) * width;
-            const y = (Math.cos(i * 678.9) * 0.5 + 0.5) * height * 0.4;
-            ctx.globalAlpha = Math.random() * 0.3;
-            ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.globalAlpha = 1.0;
     };
 
     const drawBowler = (ctx: CanvasRenderingContext2D, x: number, y: number, isHoldingBall: boolean, gameState: GameState, angle: number) => {
@@ -257,24 +316,38 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     const drawReflections = (ctx: CanvasRenderingContext2D) => {
         ctx.save();
-        ctx.globalAlpha = 0.1;
-        ctx.scale(1, -0.4);
-        ctx.translate(0, -HEAD_PIN_Y * 2 - 120);
+        // Masking for reflection fade
+        // We draw scale -Y
+        ctx.translate(0, -HEAD_PIN_Y * 2 - 120); // Mirror plane
+        ctx.scale(1, -0.4); // Flatsquash reflection
 
+        ctx.globalAlpha = 0.25;
+
+        // Draw Pins Reflection
         pins.forEach(pin => {
             if (pin.isDown) return;
-            ctx.save(); ctx.translate(pin.x, pin.y);
-            ctx.fillStyle = '#fff';
+            // Simple white silhouette for reflection looks cleaner than full detail
+            ctx.save();
+            ctx.translate(pin.x, pin.y);
+            ctx.fillStyle = '#e6e6e6';
+            ctx.shadowBlur = 10; ctx.shadowColor = '#fff';
             ctx.beginPath(); ctx.arc(0, 0, PIN_RADIUS, 0, Math.PI * 2); ctx.fill();
             ctx.restore();
         });
 
+        // Ball Reflection
         if (gameState === 'ROLLING' || gameState === 'THROW_SEQUENCE') {
-            ctx.save(); ctx.translate(ball.x, ball.y);
-            ctx.fillStyle = '#fff';
+            ctx.save();
+            ctx.translate(ball.x, ball.y);
+            // Ball reflection matches color
+            const bRefGrad = ctx.createRadialGradient(-5, -5, 0, 0, 0, ball.radius);
+            bRefGrad.addColorStop(0, '#3b82f6');
+            bRefGrad.addColorStop(1, '#1d4ed8');
+            ctx.fillStyle = bRefGrad;
             ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI * 2); ctx.fill();
             ctx.restore();
         }
+
         ctx.restore();
     };
 
@@ -287,28 +360,70 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         const scale = 1.0 + (pin.y / CANVAS_HEIGHT) * 0.15;
         ctx.scale(scale, scale);
 
-        ctx.fillStyle = 'rgba(0,0,0,0.25)';
-        ctx.beginPath(); ctx.ellipse(0, 10, PIN_RADIUS, 5, 0, 0, Math.PI * 2); ctx.fill();
+        // 1. Drop Shadow (Soft Realism)
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 15; ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.beginPath(); ctx.ellipse(0, 8, PIN_RADIUS * 0.7, 4, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
 
-        const pGrad = ctx.createRadialGradient(-PIN_RADIUS * 0.3, -PIN_RADIUS * 0.4, 2, 0, 0, PIN_RADIUS);
-        pGrad.addColorStop(0, '#ffffff');
-        pGrad.addColorStop(0.8, '#dfe6e9');
-        pGrad.addColorStop(1, '#b2bec3');
+        // 2. Pin Body Shape (Path)
+        const createPinPath = () => {
+            ctx.beginPath();
+            ctx.moveTo(0, -PIN_RADIUS * 1.5); // Top center
+            // Neck
+            ctx.bezierCurveTo(PIN_RADIUS * 0.7, -PIN_RADIUS * 1.5, PIN_RADIUS * 0.9, -PIN_RADIUS * 0.6, PIN_RADIUS, 0); // Shoulder
+            // Belly
+            ctx.bezierCurveTo(PIN_RADIUS * 1.05, PIN_RADIUS * 0.8, -PIN_RADIUS * 1.05, PIN_RADIUS * 0.8, -PIN_RADIUS, 0);
+            // Other Shoulder
+            ctx.bezierCurveTo(-PIN_RADIUS * 0.9, -PIN_RADIUS * 0.6, -PIN_RADIUS * 0.7, -PIN_RADIUS * 1.5, 0, -PIN_RADIUS * 1.5);
+            ctx.closePath();
+        };
+
+        // 3. Main Gradient (Simulate 3D Cylindrical lighting)
+        // Light comes from top-left
+        const pGrad = ctx.createLinearGradient(-PIN_RADIUS, 0, PIN_RADIUS, 0);
+        pGrad.addColorStop(0.0, '#b2bec3'); // Dark edge
+        pGrad.addColorStop(0.2, '#ffffff'); // Highlight
+        pGrad.addColorStop(0.5, '#dfe6e9'); // Mid
+        pGrad.addColorStop(0.9, '#636e72'); // Shadow edge
+        pGrad.addColorStop(1.0, '#2d3436'); // Rim shadow
 
         ctx.fillStyle = pGrad;
-        ctx.beginPath();
-        ctx.moveTo(0, -PIN_RADIUS * 1.5);
-        ctx.bezierCurveTo(PIN_RADIUS, -PIN_RADIUS * 1.5, PIN_RADIUS, -PIN_RADIUS * 0.5, PIN_RADIUS, 0);
-        ctx.bezierCurveTo(PIN_RADIUS, PIN_RADIUS, -PIN_RADIUS, PIN_RADIUS, -PIN_RADIUS, 0);
-        ctx.bezierCurveTo(-PIN_RADIUS, -PIN_RADIUS * 0.5, -PIN_RADIUS, -PIN_RADIUS * 1.5, 0, -PIN_RADIUS * 1.5);
+        createPinPath();
         ctx.fill();
 
-        ctx.fillStyle = '#d63031';
-        ctx.fillRect(-PIN_RADIUS * 0.7, -PIN_RADIUS * 0.8, PIN_RADIUS * 1.4, 3);
-        ctx.fillRect(-PIN_RADIUS * 0.6, -PIN_RADIUS * 0.6, PIN_RADIUS * 1.2, 2);
+        // 4. Red Stripes (With curvature)
+        // Clip to pin body so stripes don't bleed
+        ctx.save();
+        ctx.clip();
+        const drawStripe = (yOffset: number, thickness: number) => {
+            ctx.fillStyle = '#d63031';
+            // Use a gradient for the stripe too
+            const sGrad = ctx.createLinearGradient(-PIN_RADIUS, 0, PIN_RADIUS, 0);
+            sGrad.addColorStop(0, '#b00');
+            sGrad.addColorStop(0.2, '#f00');
+            sGrad.addColorStop(0.8, '#a00');
+            ctx.fillStyle = sGrad;
 
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.beginPath(); ctx.ellipse(-3, -8, 4, 8, Math.PI / 6, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath();
+            // Arc simulating cylinder wrap
+            ctx.ellipse(0, yOffset, PIN_RADIUS, thickness, 0, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        drawStripe(-PIN_RADIUS * 0.9, 5); // Neck stripe
+        drawStripe(-PIN_RADIUS * 0.55, 5); // Lower stripe
+        ctx.restore();
+
+        // 5. Specular Gloss (Shiny Plastic)
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        const glossGrad = ctx.createLinearGradient(-5, -30, 0, 10);
+        glossGrad.addColorStop(0, 'rgba(255,255,255,0.8)');
+        glossGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = glossGrad;
+        ctx.beginPath(); ctx.ellipse(-PIN_RADIUS * 0.3, -PIN_RADIUS * 0.5, 3, 12, -0.2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
 
         ctx.restore();
     };
@@ -438,10 +553,16 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillStyle = '#0fbcf9';
         ctx.font = 'bold 36px "Press Start 2P"';
         ctx.textAlign = 'center';
+        // Multi-pass bloom
+        ctx.fillText("LANE", 110, 80);
+        ctx.shadowBlur = neonGlow * 0.5;
         ctx.fillText("LANE", 110, 80);
 
         ctx.shadowColor = '#f53b57';
         ctx.fillStyle = '#f53b57';
+        ctx.shadowBlur = neonGlow;
+        ctx.fillText("SHARK", 300, 80);
+        ctx.shadowBlur = neonGlow * 0.5;
         ctx.fillText("SHARK", 300, 80);
         ctx.restore();
 
@@ -477,6 +598,33 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         woodGrad.addColorStop(1, '#63442a');
         ctx.fillStyle = woodGrad;
         ctx.fillRect(laneX, 0, LANE_WIDTH, CANVAS_HEIGHT);
+
+        // Apply High-Res Wood Pattern
+        if (woodPattern) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'overlay';
+            ctx.globalAlpha = 0.6;
+            // Tile the pattern vertically
+            const pattern = ctx.createPattern(woodPattern, 'repeat');
+            if (pattern) {
+                ctx.translate(laneX, 0);
+                ctx.fillStyle = pattern;
+                ctx.fillRect(0, 0, LANE_WIDTH, CANVAS_HEIGHT);
+            }
+            ctx.restore();
+        }
+
+        // Lane Arrows (Marks) - Realistic
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        for (let i = 1; i <= 5; i++) {
+            const arrowX = laneX + (LANE_WIDTH / 6) * i;
+            const arrowY = 300;
+            ctx.beginPath();
+            ctx.moveTo(arrowX, arrowY);
+            ctx.lineTo(arrowX - 5, arrowY - 20);
+            ctx.lineTo(arrowX + 5, arrowY - 20);
+            ctx.fill();
+        }
 
         drawBallReturn(ctx);
 
@@ -611,27 +759,95 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 drawBowler(ctx, ball.x, BALL_START_Y + 40, false, gameState, ball.angle);
             }
 
-            ctx.save();
-            ctx.translate(ball.x, ball.y);
-            if (gameState === 'ROLLING') {
-                ctx.globalAlpha = 0.4;
-                ctx.fillStyle = 'rgba(96, 165, 250, 0.4)';
-                ctx.beginPath(); ctx.arc(0, 15, ball.radius, 0, Math.PI * 2); ctx.fill();
-                ctx.globalAlpha = 1.0;
+            // Hide ball if inside return mechanism (Travels underground)
+            const isHiddenInReturn = gameState === 'BALL_RETURN' && ball.x <= 30 && ball.y < BALL_START_Y - 40;
+
+            if (!isHiddenInReturn) {
+                ctx.save();
+                ctx.translate(ball.x, ball.y);
+
+                // Dynamic Shadow
+                if (gameState === 'ROLLING') {
+                    ctx.save();
+                    ctx.translate(0, 15);
+                    ctx.scale(1, 0.3);
+                    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                    ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI * 2); ctx.fill();
+                    ctx.restore();
+                }
+
+                // Rolling Animation (Rotation)
+                if (gameState === 'ROLLING') {
+                    const rotation = (ball.y / (ball.radius * 2 * Math.PI)) * Math.PI * 2;
+                    // Rotate along X-axis simulation? 
+                    // Since it's 2D top-down, we simulate rolling by rotating the context
+                    ctx.rotate(rotation);
+                }
+
+                if (ballImage && ballImage.complete && ballImage.naturalWidth > 0) {
+                    ctx.save();
+                    ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI * 2); ctx.clip();
+                    ctx.drawImage(ballImage, -ball.radius, -ball.radius, ball.radius * 2, ball.radius * 2);
+                    ctx.restore();
+
+                    // Spherical Shading Overlay
+                    const sphereGrad = ctx.createRadialGradient(-ball.radius * 0.4, -ball.radius * 0.4, 2, 0, 0, ball.radius);
+                    sphereGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
+                    sphereGrad.addColorStop(0.5, 'transparent');
+                    sphereGrad.addColorStop(1, 'rgba(0,0,0,0.4)');
+                    ctx.fillStyle = sphereGrad;
+                    ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI * 2); ctx.fill();
+                } else {
+                    // PROCEDURAL PRO BALL
+                    // Base material
+                    const mat = ball.material || 'PLASTIC';
+
+                    ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
+
+                    if (mat === 'RESIN') {
+                        // Swirl Pattern
+                        const swirl = ctx.createLinearGradient(-ball.radius, -ball.radius, ball.radius, ball.radius);
+                        swirl.addColorStop(0, '#1e3a8a');
+                        swirl.addColorStop(0.3, '#3b82f6');
+                        swirl.addColorStop(0.5, '#172554');
+                        swirl.addColorStop(0.7, '#60a5fa');
+                        swirl.addColorStop(1, '#1e3a8a');
+                        ctx.fillStyle = swirl;
+                    } else if (mat === 'URETHANE') {
+                        // Solid Matte with speckled noise
+                        ctx.fillStyle = '#be123c'; // Deep Red Urethane default
+                    } else {
+                        // Plastic (High Polish)
+                        const bGrad = ctx.createRadialGradient(-ball.radius * 0.4, -ball.radius * 0.4, 2, 0, 0, ball.radius);
+                        bGrad.addColorStop(0, '#93c5fd');
+                        bGrad.addColorStop(0.7, '#1e4ed8');
+                        bGrad.addColorStop(1, '#0c2461');
+                        ctx.fillStyle = bGrad;
+                    }
+                    ctx.fill();
+
+                    // Speckles for Urethane
+                    if (mat === 'URETHANE') {
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                        for (let k = 0; k < 10; k++) {
+                            const rx = (Math.random() - 0.5) * ball.radius * 1.5;
+                            const ry = (Math.random() - 0.5) * ball.radius * 1.5;
+                            if (rx * rx + ry * ry < ball.radius * ball.radius) {
+                                ctx.beginPath(); ctx.arc(rx, ry, 2, 0, Math.PI * 2); ctx.fill();
+                            }
+                        }
+                        ctx.restore();
+                    }
+
+                    // Intense Gloss for Plastic/Resin
+                    if (mat !== 'URETHANE') {
+                        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                        ctx.beginPath(); ctx.ellipse(-ball.radius * 0.3, -ball.radius * 0.3, ball.radius * 0.25, ball.radius * 0.15, Math.PI / 4, 0, Math.PI * 2); ctx.fill();
+                    }
+                }
+                ctx.restore();
             }
-
-            const bGrad = ctx.createRadialGradient(-ball.radius * 0.4, -ball.radius * 0.4, 2, 0, 0, ball.radius);
-            bGrad.addColorStop(0, '#93c5fd');
-            bGrad.addColorStop(0.7, '#1e4ed8');
-            bGrad.addColorStop(1, '#0c2461');
-            ctx.fillStyle = bGrad;
-            ctx.shadowBlur = 25; ctx.shadowColor = 'rgba(30, 78, 216, 0.6)';
-            ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI * 2); ctx.fill();
-            ctx.shadowBlur = 0;
-
-            ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.beginPath(); ctx.ellipse(-6, -7, 8, 4, Math.PI / 4, 0, Math.PI * 2); ctx.fill();
-            ctx.restore();
         }
 
         if (gameState === 'THROW_SEQUENCE') {
