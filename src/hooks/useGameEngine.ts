@@ -29,9 +29,15 @@ type UseGameEngineProps = {
     };
 };
 
+import { CelebrationType } from '../components/CelebrationOverlay';
+
+// ... (existing imports)
+
 export function useGameEngine({ assets }: UseGameEngineProps) {
     const [currentGameState, setCurrentGameState] = useState<GameState>('SPLASH');
+    const [celebration, setCelebration] = useState<CelebrationType>(null);
     const [throwStep, setThrowStep] = useState<ThrowStep>('POSITION');
+
     const [isCountingDown, setIsCountingDown] = useState(false);
 
     // Oscillating values for All-in-One throw
@@ -450,17 +456,49 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         pinsStandingBeforeThrowRef.current = remainingStanding;
 
         let eventType = 'throwOne';
+        let celebrationType: CelebrationType = null;
+
+        // Split Detection Logic
+        const isSplit = (() => {
+            if (standingBefore === 10) return false; // First throw of frame was full set
+            if (standingBefore <= 1) return false; // Need at least 2 pins
+
+            // Check if head pin (Pin 1) is down (it's ID 0 in array usually, check IDs)
+            // Pins are 1-based IDs in this game? Let's assume based on constants.
+            // If we don't have direct access to pin IDs here without checking pinsRef,
+            // we'll rely on remaining count for now or better yet, look at pinsRef.
+            const standingPins = pinsRef.current.filter(p => !p.isDown);
+            const hasHeadPin = standingPins.some(p => Math.abs(p.x - CANVAS_WIDTH / 2) < 5); // Head pin is center
+
+            if (hasHeadPin) return false; // Not a split if head pin stands
+
+            if (standingPins.length < 2) return false;
+
+            // Simple gap check: Max distance between any two standing pins > threshold
+            const xs = standingPins.map(p => p.x).sort((a, b) => a - b);
+            const maxGap = xs[xs.length - 1] - xs[0];
+            return maxGap > LANE_WIDTH * 0.5; // If pins are spread over 50% of lane width
+        })();
+
         if (standingBefore === 10 && knockedPins === 10) {
             eventType = 'strike';
             setMessage("STRIKE!");
+            celebrationType = 'STRIKE';
         } else if (standingBefore < 10 && remainingStanding === 0) {
             eventType = 'spare';
             setMessage("SPARE!");
+            celebrationType = 'SPARE';
         } else if (knockedPins === 0) {
             eventType = 'gutter';
+            celebrationType = 'GUTTER';
         } else {
             setMessage(`${knockedPins} PINS`);
+            if (isSplit && remainingStanding > 0) {
+                celebrationType = 'SPLIT';
+                setMessage("SPLIT!");
+            }
         }
+
 
         const newRolls = [...currentPlayer.rolls, knockedPins];
         const tempFrames = calculateBowlingScore(newRolls);
@@ -508,6 +546,8 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
                     streakMultiplier = data.mult;
                     streakName = data.name;
                     setMessage(`🔥 ${data.name} 🔥`);
+                    if (streakCount === 3) celebrationType = 'TURKEY';
+                    if (streakCount === 12) celebrationType = 'PERFECT';
                 }
             }
 
@@ -550,6 +590,10 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             saveProgress(p1.inventory);
         }
 
+
+        if (celebrationType) {
+            setCelebration(celebrationType);
+        }
 
         updatedPlayers[currentPlayerIdx] = { ...currentPlayer, rolls: newRolls, frames: tempFrames, score: totalScore };
         setPlayers(updatedPlayers);
@@ -687,6 +731,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         },
         tutorialStep, advanceTutorial: () => setTutorialStep(prev => prev + 1), endTutorial: () => { setTutorialStep(-1); setCurrentGameState('READY_TO_BOWL'); },
         screenShake,
-        canvasRef
+        canvasRef,
+        celebration, setCelebration
     };
 }

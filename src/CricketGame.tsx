@@ -25,6 +25,8 @@ import ModeSelect from './components/ModeSelect';
 import PlayerCreator from './components/PlayerCreator';
 import LevelUpModal from './components/LevelUpModal';
 import ProgressionPanel from './components/ProgressionPanel';
+import CelebrationOverlay from './components/CelebrationOverlay';
+
 
 
 /**
@@ -488,8 +490,27 @@ function LaneSharkGame() {
                         )}
 
                         <ImpactMessage message={game.impactEffectText} isVisible={game.showImpactEffect} />
+
+                        {/* Celebration Overlay */}
+                        <CelebrationOverlay
+                            type={game.celebration}
+                            onComplete={() => game.setCelebration(null)}
+                        />
+
+                        {/* Level Up Modal */}
+                        {game.showLevelUp && game.players[0]?.profile && (
+                            <LevelUpModal
+                                profile={game.players[0].profile}
+                                onSave={(updatedProfile) => {
+                                    game.updateProfile(updatedProfile);
+                                    game.setShowLevelUp(false);
+                                }}
+                            />
+                        )}
+
                     </div>
                 </div>
+
             )}
         </div>
     );
