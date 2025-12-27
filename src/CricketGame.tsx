@@ -202,10 +202,11 @@ function LaneSharkGame() {
                             </button>
                             <button
                                 onClick={() => setIsShopOpen(true)}
-                                className="btn-glass p-3 rounded-xl border border-white/20 hover:scale-110 transition-transform"
+                                className="btn-glass p-3 rounded-xl border border-white/20 hover:scale-110 transition-transform flex items-center gap-2"
                                 title="PRO SHOP"
                             >
-                                🎳
+                                <span className="text-[10px] font-['Press_Start_2P'] hidden sm:block text-blue-200">SHOP</span>
+                                🛒
                             </button>
                         </div>
 
@@ -362,8 +363,8 @@ function LaneSharkGame() {
                                     </div>
                                 </div>
 
-                                {isBowlReady && !currentPlayer?.isCpu && (
-                                    <div className="flex gap-2 mt-1">
+                                {currentPlayer && !currentPlayer.isCpu && (
+                                    <div className="flex gap-2 mt-1 pointer-events-auto">
                                         {/* Scorecard Toggle */}
                                         <button
                                             onClick={() => setShowScorecard(!showScorecard)}
@@ -393,6 +394,7 @@ function LaneSharkGame() {
                                         </button>
                                     </div>
                                 )}
+
                             </div>
 
                             {/* 2. Bottom Area: Intentionally empty for bowler interaction and scorecard visibility */}
