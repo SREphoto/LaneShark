@@ -173,7 +173,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         }
 
         // --- PIXEL ART SPRITE RENDERING ---
-        // Scale factor for pixels
+        // Scale factor for pixel look (V1.3)
         const S = 4; // 1 pixel = 4 units
 
         // Helper to draw a "pixel" rect
