@@ -67,7 +67,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         if (currentGameState !== 'THROW_SEQUENCE' && currentGameState !== 'READY_TO_BOWL') return;
 
         const finalPower = powerOscillation * powerFactor;
-        const finalAngle = aimOscillation * 45 + accuracyBias; // Degrees
+        const finalAngle = aimOscillation * 5 + accuracyBias; // Narrow arc: +/- 5 degrees
 
         setBall(prev => ({
             ...prev,
@@ -96,7 +96,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
 
     const ballRef = useRef<Ball>({
-        x: CANVAS_WIDTH / 2, y: BALL_START_Y,
+        x: 300, y: BALL_START_Y,
         radius: BALL_RADIUS, dx: 0, dy: 0,
         weight: 1.8, spin: 0, inGutter: false,
         material: 'PLASTIC', angle: 0
@@ -127,24 +127,24 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         const specs: Spectator[] = [];
         const colors = ['#e53e3e', '#3182ce', '#38a169', '#d69e2e', '#805ad5', '#d35400', '#8e44ad', '#2980b9'];
 
-        // Left Side Grandstand (Near Bowler)
+        // Left Side Grandstand (Far Left)
         for (let i = 0; i < 6; i++) {
             specs.push({
                 id: i,
-                x: 10 + Math.random() * 30, // Left side (10-40), strictly outside gutter
-                y: 450 + i * 25 + Math.random() * 5, // Y ranges 450-600 (Bowler is at 530)
+                x: 0 + Math.random() * 20, // Far left
+                y: 100 + i * 50 + Math.random() * 10, // Higher up / further away
                 color: colors[i % colors.length],
                 state: 'IDLE',
                 animOffset: Math.random() * 100
             });
         }
 
-        // Right Side Grandstand (Near Bowler)
+        // Right Side Grandstand (Far Right)
         for (let i = 6; i < 12; i++) {
             specs.push({
                 id: i,
-                x: CANVAS_WIDTH - 40 + Math.random() * 30, // Right side (360-390)
-                y: 450 + (i - 6) * 25 + Math.random() * 5,
+                x: CANVAS_WIDTH - 20 + Math.random() * 20, // Far right
+                y: 100 + (i - 6) * 50 + Math.random() * 10,
                 color: colors[i % colors.length],
                 state: 'IDLE',
                 animOffset: Math.random() * 100
@@ -208,7 +208,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
     const resetPins = useCallback(() => {
         const newPins: Pin[] = [];
-        const startX = CANVAS_WIDTH / 2;
+        const startX = 300; // Center of Lane 2
         const startY = HEAD_PIN_Y;
         const spacingX = PIN_SPACING / 2;
         const rowHeight = PIN_SPACING * Math.sin(Math.PI / 3);
@@ -241,7 +241,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
     const resetBall = useCallback(() => {
         const playerProfile = players[currentPlayerIdx]?.profile;
-        let startX = CANVAS_WIDTH / 2;
+        let startX = 300; // Center of Lane 2
         if (playerProfile?.handedness === 'LEFT') startX += 40;
         else if (playerProfile?.handedness === 'RIGHT') startX -= 40;
 
@@ -399,7 +399,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         }
         particlesRef.current = activeParticles;
 
-        if (screenShake > 0) setScreenShake(prev => Math.max(0, prev * 0.9));
+        if (screenShake > 0) setScreenShake(prev => prev > 0.05 ? prev * 0.85 : 0);
 
         setBall({ ...ballRef.current });
         setPins([...pinsRef.current]);
@@ -602,7 +602,13 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             setCelebration(celebrationType);
         }
 
-        updatedPlayers[currentPlayerIdx] = { ...currentPlayer, rolls: newRolls, frames: tempFrames, score: totalScore };
+        if (currentPlayerIdx === 0) {
+            // Human player (P1) is the one we updated above in 'p1'
+            updatedPlayers[0] = { ...p1, rolls: newRolls, frames: tempFrames, score: totalScore };
+        } else {
+            // CPU players
+            updatedPlayers[currentPlayerIdx] = { ...currentPlayer, rolls: newRolls, frames: tempFrames, score: totalScore };
+        }
         setPlayers(updatedPlayers);
         triggerEvent(eventType, { pinsKnocked: knockedPins, totalScore });
 

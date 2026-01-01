@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { useGameAssets } from './hooks/useGameAssets';
 import { useGameEngine } from './hooks/useGameEngine';
 import { TUTORIAL_STEPS } from './constants';
-import { GameMode, CpuPersonality, PlayerProfile } from './types';
+import { GameMode, CpuPersonality, PlayerProfile, BallMaterial } from './types';
 import { loadProgress, saveProgress } from './utils/storageUtils';
 import { SHOP_ITEMS } from './data/shopItems';
 
@@ -127,6 +127,13 @@ function LaneSharkGame() {
     const isThrowing = game.currentGameState === 'THROW_SEQUENCE';
     const showTutorial = game.currentGameState === 'TUTORIAL' && game.tutorialStep >= 0;
 
+    const availableBalls = useMemo(() => {
+        const balls = ['PLASTIC'];
+        if (inventory.items.includes('urethane_ball')) balls.push('URETHANE');
+        if (inventory.items.includes('resin_ball')) balls.push('RESIN');
+        return balls as BallMaterial[];
+    }, [inventory.items]);
+
     // Global Interaction Handler for Throw Sequence
     useEffect(() => {
         const handleInteraction = (e?: KeyboardEvent) => {
@@ -224,9 +231,10 @@ function LaneSharkGame() {
                         laneCondition={game.laneCondition}
                         equippedOutfitId={inventory.profile?.equippedOutfitId}
                         equippedItems={inventory.items}
-
                         screenShake={game.screenShake}
                         onClickBowler={() => handleModeSelect('SOLO')}
+                        availableBalls={availableBalls}
+                        onSelectBall={game.setUserMaterial}
                     />
 
                     {inventory.profile && (
@@ -423,6 +431,8 @@ function LaneSharkGame() {
                                     game.startThrowSequence();
                                 }
                             }}
+                            availableBalls={availableBalls}
+                            onSelectBall={game.setUserMaterial}
                         />
 
                         {isShopOpen && (
