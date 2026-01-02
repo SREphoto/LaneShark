@@ -582,6 +582,10 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             if (streakCount > lifetimeStats.bestStreak) lifetimeStats.bestStreak = streakCount;
             p1.inventory.lifetimeStats = lifetimeStats;
 
+            // CRITICAL FIX: Sync the updated profile into the inventory before saving/checking level up
+            // The Player object duplicates profile in both 'p1.profile' and 'p1.inventory.profile'
+            p1.inventory.profile = { ...p1.profile };
+
             // Particle effects
             if (eventType === 'strike') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 80 + (streakCount * 10), '#ffd32a');
             else if (eventType === 'spare') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 40, '#0fbcf9');
@@ -592,6 +596,8 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             if (p1.profile.xp >= nextXp) {
                 p1.profile.level++;
                 p1.profile.statPoints += 2;
+                // Update the inventory copy again after level up modification
+                p1.inventory.profile = { ...p1.profile };
                 setShowLevelUp(true);
             }
             saveProgress(p1.inventory);
