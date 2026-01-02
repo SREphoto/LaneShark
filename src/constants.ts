@@ -21,7 +21,7 @@ export const BALL_RADIUS = 18;
 export const PIN_SPACING = 60;
 
 export const BALL_START_Y = 1120;
-export const HEAD_PIN_Y = 150;
+export const HEAD_PIN_Y = 200;
 
 // --- Colors ---
 export const LANE_COLOR = '#eebc65';
@@ -37,9 +37,9 @@ export const BASE_THROW_SPEED = 18;
 
 export const PIN_COLLISION_RADIUS = PIN_RADIUS + BALL_RADIUS;
 export const PIN_PIN_COLLISION_RADIUS = PIN_RADIUS * 2;
-export const PIN_DAMPING = 0.96;
+export const PIN_DAMPING = 0.95;
 export const PIN_ROTATION_DAMPING = 0.95;
-export const IMPACT_FACTOR = 0.85;
+export const IMPACT_FACTOR = 0.75;
 export const WALL_BOUNCE = 0.5;
 
 export const BALL_WEIGHT_LIGHT = 1.0;

@@ -1,5 +1,13 @@
 # LaneShark Change Log
 
+## [1.5.0] - 2026-01-01
+
+### Visuals & Gameplay
+
+- **Bigger Bowler**: Character model scaled up by 50% for better presence.
+- **Mobile Visibility**: Moved the pin rack down (Y: 200) so the back row is now fully visible on all screens and not obscured by the top HUD.
+- **Difficulty Tuning**: Adjusted physics engine. Pins are heavier (reduced impact transfer) and settle faster, making strikes slightly harder and more rewarding.
+
 ## [1.4.0] - 2026-01-01
 
 ### Critical Fixes

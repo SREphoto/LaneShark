@@ -175,6 +175,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
         ctx.save();
         ctx.translate(x, y - animY);
+        ctx.scale(1.5, 1.5); // Bigger Bowler
         ctx.rotate(angle * Math.PI / 180 * 0.1); // Small lean
 
         // Simple Pixel Bowler
