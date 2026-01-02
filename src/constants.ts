@@ -8,17 +8,17 @@
 export const CANVAS_WIDTH = 400;
 export const CANVAS_HEIGHT = 1200;
 
-export const LANE_WIDTH = 180;
+export const LANE_WIDTH = 260;
 export const LANE_LENGTH = 1400;
 export const GUTTER_WIDTH = 45;
 export const BALL_RETURN_WIDTH = 30;
 
-export const LANE_LEFT_EDGE = 210;
-export const LANE_RIGHT_EDGE = 390;
+export const LANE_LEFT_EDGE = (CANVAS_WIDTH - LANE_WIDTH) / 2;
+export const LANE_RIGHT_EDGE = LANE_LEFT_EDGE + LANE_WIDTH;
 
 export const PIN_RADIUS = 12;
 export const BALL_RADIUS = 18;
-export const PIN_SPACING = 40;
+export const PIN_SPACING = 60;
 
 export const BALL_START_Y = 1120;
 export const HEAD_PIN_Y = 150;

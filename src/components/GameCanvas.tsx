@@ -49,7 +49,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const woodPattern = useMemo(() => {
         if (typeof document === 'undefined') return null;
         const c = document.createElement('canvas');
-        c.width = LANE_WIDTH || 180;
+        c.width = LANE_WIDTH;
         c.height = 1024;
         const ctx = c.getContext('2d');
         if (!ctx) return null;
@@ -65,8 +65,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillRect(0, 0, c.width, c.height);
 
         // Boards
-        const boardWidth = c.width / 15;
-        for (let i = 0; i < 15; i++) {
+        const boardWidth = c.width / 7; // Fewer boards for wider single lane
+        for (let i = 0; i < 7; i++) {
             if (i % 2 === 0) {
                 ctx.fillStyle = 'rgba(0,0,0,0.03)';
                 ctx.fillRect(i * boardWidth, 0, boardWidth, c.height);
@@ -106,17 +106,17 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         const gameX = (mouseX - offsetX) / scale;
         const gameY = (mouseY - offsetY) / scale;
 
-        // Check if clicking near ball/bowler
+        // Check if clicking near bowler to start throw
         const distToBowler = Math.sqrt(Math.pow(gameX - ball.x, 2) + Math.pow(gameY - (ball.y + 40), 2));
         if (distToBowler < 60 && onClickBowler) {
             onClickBowler();
             return;
         }
 
-        // Check if clicking balls in return area
+        // Check if clicking balls in return area (Single Lane Return Position)
         if (onSelectBall) {
             availableBalls.forEach((mat, i) => {
-                const bx = 200;
+                const bx = 380; // Right side return
                 const by = BALL_START_Y - 40 + (i * 45);
                 const dist = Math.sqrt(Math.pow(gameX - bx, 2) + Math.pow(gameY - by, 2));
                 if (dist < 20) {
@@ -175,7 +175,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
         ctx.save();
         ctx.translate(x, y - animY);
-        ctx.rotate(angle * Math.PI / 180 * 0.1);
+        ctx.rotate(angle * Math.PI / 180 * 0.1); // Small lean
 
         // Simple Pixel Bowler
         ctx.fillStyle = '#1a1a1a'; ctx.fillRect(-8, 0, 6, 15); ctx.fillRect(2, 0, 6, 15); // Legs
@@ -207,39 +207,40 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             ctx.scale(scale, scale);
 
             // --- ENVIRONMENT ---
-            // Stands
-            ctx.fillStyle = '#111827';
-            ctx.fillRect(0, 0, 30, CANVAS_HEIGHT);
-            ctx.fillRect(CANVAS_WIDTH - 30, 0, 30, CANVAS_HEIGHT);
+            // Single Lane Setup
+            const lx = (CANVAS_WIDTH - LANE_WIDTH) / 2;
+            const Wood = ctx.createPattern(woodPattern!, 'repeat')!;
 
-            const drawLane = (lx: number, active: boolean) => {
-                const Wood = ctx.createPattern(woodPattern!, 'repeat')!;
-                ctx.fillStyle = '#050505'; ctx.fillRect(lx - 15, 0, 15, CANVAS_HEIGHT); ctx.fillRect(lx + LANE_WIDTH, 0, 15, CANVAS_HEIGHT); // Gutters
-                ctx.fillStyle = Wood; if (!active) ctx.globalAlpha = 0.4;
-                ctx.fillRect(lx, 0, LANE_WIDTH, CANVAS_HEIGHT);
-                ctx.globalAlpha = 1.0;
-                // Foul line
-                ctx.fillStyle = '#000'; ctx.fillRect(lx, BALL_START_Y - 20, LANE_WIDTH, 5);
-            };
+            // Gutters
+            ctx.fillStyle = '#111';
+            ctx.fillRect(lx - 25, 0, 25, CANVAS_HEIGHT);
+            ctx.fillRect(lx + LANE_WIDTH, 0, 25, CANVAS_HEIGHT);
 
-            drawLane(10, false); // Lane 1
-            drawLane(210, true); // Lane 2 (Interactive)
+            // Lane
+            ctx.fillStyle = Wood;
+            ctx.fillRect(lx, 0, LANE_WIDTH, CANVAS_HEIGHT);
 
-            // Ball Return Unit
-            ctx.fillStyle = '#1e293b'; ctx.fillRect(185, 0, 30, CANVAS_HEIGHT);
-            ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(200, BALL_START_Y + 20, 12, 80, 0, 0, Math.PI * 2); ctx.fill();
+            // Foul line
+            ctx.fillStyle = '#000';
+            ctx.fillRect(lx, BALL_START_Y - 20, LANE_WIDTH, 5);
+
+            // Ball Return (Right Side)
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(360, 0, 40, CANVAS_HEIGHT);
+            ctx.fillStyle = '#000';
+            ctx.beginPath(); ctx.ellipse(380, BALL_START_Y + 20, 12, 80, 0, 0, Math.PI * 2); ctx.fill();
 
             // Available Balls in Return
             availableBalls.forEach((mat, i) => {
                 ctx.save();
-                ctx.translate(200, BALL_START_Y - 20 + (i * 45));
+                ctx.translate(380, BALL_START_Y - 20 + (i * 45));
                 const colors: Record<string, string> = { PLASTIC: '#3b82f6', URETHANE: '#be123c', RESIN: '#1e3a8a' };
                 ctx.fillStyle = colors[mat] || '#666';
                 ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
                 ctx.restore();
             });
 
-            // Spectators
+            // Spectators (Use props, but keep simple placement)
             const t = Date.now();
             spectators.forEach(s => {
                 ctx.save();
@@ -280,11 +281,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             if (gameState === 'THROW_SEQUENCE') {
                 ctx.save(); ctx.translate(ball.x, ball.y);
                 if (throwStep === 'AIM') {
+                    // FIX: Aiming arc at 10 degrees (User liked this)
                     const ang = aimOscillation * Math.PI * (5 / 180);
                     ctx.rotate(ang); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.setLineDash([10, 5]);
                     ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -200); ctx.stroke();
                 }
                 if (throwStep === 'POWER') {
+                    // FIX: Constrained power bar height
                     const h = Math.min(114, powerOscillation * 120);
                     ctx.translate(45, -60); ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 0, 20, 120);
                     ctx.fillStyle = '#f53b57'; ctx.fillRect(2, 118 - h, 16, h);

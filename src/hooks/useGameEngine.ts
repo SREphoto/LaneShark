@@ -96,7 +96,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
 
     const ballRef = useRef<Ball>({
-        x: 300, y: BALL_START_Y,
+        x: CANVAS_WIDTH / 2, y: BALL_START_Y,
         radius: BALL_RADIUS, dx: 0, dy: 0,
         weight: 1.8, spin: 0, inGutter: false,
         material: 'PLASTIC', angle: 0
@@ -208,7 +208,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
     const resetPins = useCallback(() => {
         const newPins: Pin[] = [];
-        const startX = 300; // Center of Lane 2
+        const startX = CANVAS_WIDTH / 2; // Single Lane Center
         const startY = HEAD_PIN_Y;
         const spacingX = PIN_SPACING / 2;
         const rowHeight = PIN_SPACING * Math.sin(Math.PI / 3);
@@ -241,7 +241,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
     const resetBall = useCallback(() => {
         const playerProfile = players[currentPlayerIdx]?.profile;
-        let startX = 300; // Center of Lane 2
+        let startX = CANVAS_WIDTH / 2;
         if (playerProfile?.handedness === 'LEFT') startX += 40;
         else if (playerProfile?.handedness === 'RIGHT') startX -= 40;
 
@@ -603,7 +603,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         }
 
         if (currentPlayerIdx === 0) {
-            // Human player (P1) is the one we updated above in 'p1'
+            // Human player (P1) - CRITICAL: Use the locally updated p1 object to preserve XP/Money gains
             updatedPlayers[0] = { ...p1, rolls: newRolls, frames: tempFrames, score: totalScore };
         } else {
             // CPU players
