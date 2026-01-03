@@ -1388,3 +1388,76 @@ canvas {
 }
 .animate-confetti { animation: confetti-fall 3s linear forwards; }
 
+
+/* NEWS TICKER */
+@keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+.animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 30s linear infinite; }
+.animate-marquee:hover { animation-play-state: paused; }
+
+/* Redesign Utilities */
+.glass-morphism {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.cyber-border {
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.cyber-border::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    animation: scanline 2s linear infinite;
+}
+
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(400%); }
+}
+
+@keyframes scanline-fast {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+.animate-scanline-fast {
+    animation: scanline-fast 0.5s linear infinite;
+}
+
+.neon-pulse {
+    animation: neon-pulse-animation 2s infinite alternate;
+}
+
+@keyframes neon-pulse-animation {
+    0% { filter: drop-shadow(0 0 2px currentColor); }
+    100% { filter: drop-shadow(0 0 10px currentColor); }
+}
+
+.led-bg {
+    background: radial-gradient(circle, #222 1px, transparent 1px);
+    background-size: 3px 3px;
+}
+
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+}
+
+.drop-shadow-glow {
+    filter: drop-shadow(0 0 8px currentColor);
+}
+

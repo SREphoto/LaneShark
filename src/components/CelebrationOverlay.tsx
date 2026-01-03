@@ -21,7 +21,7 @@ const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({ type, onComplet
             const timer = setTimeout(() => {
                 setIsVisible(false);
                 setTimeout(onComplete, 500); // Wait for fade out
-            }, 3000); // Duration
+            }, 3500); // Slightly longer for more impact
             return () => clearTimeout(timer);
         }
     }, [type, onComplete]);
@@ -33,58 +33,90 @@ const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({ type, onComplet
             case 'STRIKE':
                 return (
                     <div className="flex flex-col items-center animate-bounce-in">
-                        <div className="relative">
-                            <h1 className="text-8xl font-black italic text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-red-600 drop-shadow-[0_0_25px_rgba(234,179,8,0.8)] transform -skew-x-12">
+                        <div className="relative group">
+                            <h1 className="text-8xl md:text-9xl font-black italic text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-500 to-orange-600 drop-shadow-[0_0_35px_rgba(234,179,8,1)] transform -skew-x-12 tracking-tighter">
                                 STRIKE!
                             </h1>
-                            <div className="absolute -inset-10 bg-yellow-400/20 blur-3xl rounded-full animate-pulse" />
+                            <div className="absolute -inset-10 bg-yellow-400/30 blur-[60px] rounded-full animate-pulse group-hover:bg-yellow-400/50" />
+                            <div className="absolute -inset-4 border-4 border-yellow-300/20 rounded-2xl animate-ping opacity-30" />
                         </div>
-                        <div className="text-4xl mt-4 animate-ping">⚡ 🎳 ⚡</div>
+                        <div className="flex gap-4 mt-8 animate-bounce">
+                            <span className="text-5xl drop-shadow-glow">⚡</span>
+                            <span className="text-6xl drop-shadow-glow">🎳</span>
+                            <span className="text-5xl drop-shadow-glow">⚡</span>
+                        </div>
+                        <div className="text-yellow-200 font-['Press_Start_2P'] text-[10px] mt-6 tracking-[0.4em] uppercase opacity-70">Immortal Roll</div>
                     </div>
                 );
             case 'SPARE':
                 return (
                     <div className="flex flex-col items-center animate-slide-in-right">
-                        <h1 className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]">
-                            SPARE
-                        </h1>
-                        <div className="text-3xl mt-2 text-blue-200 animate-pulse">CLEAN UP!</div>
+                        <div className="relative">
+                            <h1 className="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-600 drop-shadow-[0_0_25px_rgba(59,130,246,0.8)]">
+                                SPARE
+                            </h1>
+                            <div className="absolute -inset-4 bg-blue-500/10 blur-2xl rounded-lg animate-pulse" />
+                        </div>
+                        <div className="mt-4 px-6 py-2 bg-blue-500/20 border border-blue-400/30 rounded-full">
+                            <div className="text-2xl text-blue-100 font-bold tracking-widest animate-pulse">CLEAN UP!</div>
+                        </div>
                     </div>
                 );
             case 'GUTTER':
                 return (
                     <div className="flex flex-col items-center animate-shake">
-                        <h1 className="text-6xl font-['Creepster'] text-gray-400 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
-                            GUTTERBALL...
-                        </h1>
-                        <div className="text-4xl mt-4 grayscale opacity-50">😢 🚽 😢</div>
+                        <div className="relative">
+                            <h1 className="text-6xl md:text-7xl font-['Creepster'] text-gray-500 drop-shadow-[0_8px_15px_rgba(0,0,0,1)] tracking-widest">
+                                GUTTER...
+                            </h1>
+                            <div className="absolute inset-0 bg-red-900/10 blur-xl mix-blend-overlay" />
+                        </div>
+                        <div className="text-5xl mt-8 grayscale opacity-40 hover:grayscale-0 transition-all duration-700">😢 🚽 😢</div>
+                        <div className="text-red-500/50 font-['Press_Start_2P'] text-[8px] mt-4 uppercase">Unlucky Break</div>
                     </div>
                 );
             case 'SPLIT':
                 return (
                     <div className="flex flex-col items-center animate-pulse">
-                        <h1 className="text-7xl font-mono font-bold text-red-500 tracking-[0.5em] drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">
-                            S P L I T
-                        </h1>
-                        <div className="text-2xl mt-4 text-red-200 uppercase font-bold">DANGER ZONE</div>
+                        <div className="relative px-8 py-4 border-y-4 border-red-600/50 bg-red-950/20">
+                            <h1 className="text-7xl md:text-8xl font-mono font-black text-red-500 tracking-[0.2em] drop-shadow-[0_0_15px_rgba(239,68,68,1)]">
+                                SPLIT
+                            </h1>
+                            <div className="absolute top-0 left-0 w-4 h-full bg-red-600/50 animate-pulse" />
+                            <div className="absolute top-0 right-0 w-4 h-full bg-red-600/50 animate-pulse" />
+                        </div>
+                        <div className="text-2xl mt-6 text-red-200 uppercase font-black tracking-tighter drop-shadow-sm">DANGER ZONE</div>
                     </div>
                 );
             case 'TURKEY':
                 return (
                     <div className="flex flex-col items-center animate-zoom-in-spin">
-                        <div className="text-9xl mb-4 drop-shadow-2xl">🦃</div>
-                        <h1 className="text-7xl font-black text-orange-500 stroke-text-white drop-shadow-xl animate-bounce">
-                            TURKEY!!!
-                        </h1>
+                        <div className="relative mb-8">
+                            <div className="text-[120px] drop-shadow-[0_0_50px_rgba(251,146,60,0.6)]">🦃</div>
+                            <div className="absolute -inset-8 border-4 border-orange-500/30 rounded-full animate-spin-slow" />
+                        </div>
+                        <div className="relative">
+                            <h1 className="text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-600 drop-shadow-2xl animate-bounce">
+                                TURKEY!
+                            </h1>
+                            <div className="absolute -inset-6 bg-orange-500/20 blur-3xl rounded-full animate-pulse" />
+                        </div>
+                        <div className="text-orange-200 font-['Press_Start_2P'] text-xs mt-4 tracking-[0.5em] uppercase">Triple Threat</div>
                     </div>
                 );
             case 'PERFECT':
                 return (
                     <div className="flex flex-col items-center animate-pulse">
-                        <h1 className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 drop-shadow-2xl">
-                            PERFECT!
-                        </h1>
-                        <div className="text-4xl mt-4 text-yellow-300 font-bold">300 POINTS</div>
+                        <div className="relative">
+                            <h1 className="text-8xl md:text-[120px] font-black text-transparent bg-clip-text bg-gradient-to-br from-purple-400 via-pink-500 via-yellow-400 to-red-500 drop-shadow-[0_0_50px_rgba(168,85,247,0.8)] italic">
+                                PERFECT!
+                            </h1>
+                            <div className="absolute -inset-20 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-red-500/20 blur-[100px] animate-spin-slow" />
+                        </div>
+                        <div className="mt-8 px-10 py-4 bg-white/5 backdrop-blur-md border-2 border-yellow-400/50 rounded-2xl shadow-gold-glow">
+                            <div className="text-4xl text-yellow-300 font-black tracking-[0.2em]">300 POINTS</div>
+                        </div>
+                        <div className="text-white font-['Press_Start_2P'] text-[10px] mt-6 tracking-[0.8em] uppercase animate-shine">Legendary Bowler</div>
                     </div>
                 );
             default:
@@ -93,25 +125,46 @@ const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({ type, onComplet
     };
 
     return (
-        <div className={`fixed inset-0 z-[100] flex items-center justify-center pointer-events-none transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-            <div className="transform scale-150">
+        <div className={`fixed inset-0 z-[100] flex items-center justify-center pointer-events-none transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-[6px]" />
+
+            {/* Ambient Background VFX Patterns */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--color-primary)_0%,_transparent_70%)] mix-blend-screen animate-pulse" />
+            </div>
+
+            <div className="transform scale-110 md:scale-150">
                 {renderContent()}
             </div>
 
-            {/* Confetti/Particles for specific events */}
+            {/* Enhanced Particles for specific events */}
             {(type === 'STRIKE' || type === 'TURKEY' || type === 'PERFECT') && (
                 <div className="absolute inset-0 overflow-hidden">
-                    {Array.from({ length: 50 }).map((_, i) => (
+                    {Array.from({ length: 80 }).map((_, i) => (
                         <div
                             key={i}
-                            className="absolute w-3 h-3 bg-yellow-400 rounded-sm animate-confetti"
+                            className="absolute w-4 h-4 rounded-sm animate-confetti"
                             style={{
                                 left: `${Math.random() * 100}%`,
                                 top: `-10%`,
-                                backgroundColor: ['#fcd34d', '#f87171', '#60a5fa', '#a78bfa'][i % 4],
+                                backgroundColor: ['#fbbf24', '#f87171', '#60a5fa', '#a78bfa', '#f472b6'][i % 5],
+                                animationDelay: `${Math.random() * 3}s`,
+                                animationDuration: `${1.5 + Math.random() * 2.5}s`,
+                                filter: 'blur(1px)',
+                                transform: `rotate(${Math.random() * 360}deg)`
+                            }}
+                        />
+                    ))}
+                    {/* Extra Bloom Sprinkles */}
+                    {Array.from({ length: 30 }).map((_, i) => (
+                        <div
+                            key={`bloom-${i}`}
+                            className="absolute w-2 h-2 bg-white rounded-full animate-ping"
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 100}%`,
                                 animationDelay: `${Math.random() * 2}s`,
-                                animationDuration: `${2 + Math.random() * 3}s`
+                                opacity: 0.3
                             }}
                         />
                     ))}
@@ -122,3 +175,4 @@ const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({ type, onComplet
 };
 
 export default CelebrationOverlay;
+

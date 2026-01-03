@@ -1,5 +1,20 @@
 # LaneShark Change Log
 
+## [1.6.1] - 2026-01-01
+
+### Fixes
+
+- **News Ticker**: Removed News Ticker (reverted feature request).
+- **Cleanup**: Removed unused component code.
+
+## [1.6.0] - 2026-01-01
+
+### Features & Fixes
+
+- **News Ticker**: Added a desktop-exclusive, scrolling news ticker to the top right header with live links.
+- **Stat System Audit**: Fixed a critical bug where the "Level Up" screen was being rendered twice, causing points to be lost or miscalculated. Refactored the save logic to ensure immediate persistence.
+- **Stability**: Removed redundant UI rendering calls.
+
 ## [1.5.0] - 2026-01-01
 
 ### Visuals & Gameplay

@@ -26,6 +26,8 @@ import PlayerCreator from './components/PlayerCreator';
 import LevelUpModal from './components/LevelUpModal';
 import ProgressionPanel from './components/ProgressionPanel';
 import CelebrationOverlay from './components/CelebrationOverlay';
+import CyberButton from './components/CyberButton';
+import ModernScoreboard from './components/ModernScoreboard';
 
 
 
@@ -114,9 +116,16 @@ function LaneSharkGame() {
     };
 
     const handleLevelUpSave = (updatedProfile: PlayerProfile) => {
+        // 1. Update Game Engine State
         game.updateProfile(updatedProfile);
         game.setShowLevelUp(false);
-        setInventory(loadProgress());
+
+        // 2. Update Local Inventory State immediately (don't wait for engine sync)
+        const newInv = { ...inventory, profile: updatedProfile };
+        setInventory(newInv);
+
+        // 3. Persist to Storage
+        saveProgress(newInv);
     };
 
     const handleModeSelect = (mode: GameMode, cpu?: CpuPersonality) => {
@@ -186,13 +195,13 @@ function LaneSharkGame() {
 
                         <div className="flex items-center gap-6">
                             <div className="flex flex-col items-end">
-                                <span className="text-[8px] font-['Press_Start_2P'] text-emerald-400 mb-1">${inventory.money.toLocaleString()}</span>
-                                <div className="h-1 w-24 bg-white/10 rounded-full overflow-hidden mb-1">
+                                <span className="text-[8px] font-['Press_Start_2P'] text-emerald-400 mb-1 leading-none">${inventory.money.toLocaleString()}</span>
+                                <div className="h-1 w-24 bg-white/10 rounded-full overflow-hidden mb-1 border border-white/5">
                                     <div className="h-full bg-emerald-500 shadow-emerald-glow" style={{ width: '100%' }} />
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-2">
                                     <span className="text-[6px] font-['Press_Start_2P'] text-yellow-400">LVL {inventory.profile?.level || 1}</span>
-                                    <div className="h-1 w-16 bg-white/10 rounded-full overflow-hidden" title={`XP: ${inventory.profile?.xp} / ${game.nextLevelXp}`}>
+                                    <div className="h-1 w-16 bg-white/10 rounded-full overflow-hidden border border-white/5" title={`XP: ${inventory.profile?.xp} / ${game.nextLevelXp}`}>
                                         <div
                                             className="h-full bg-yellow-400 shadow-gold-glow transition-all duration-1000"
                                             style={{ width: `${game.xpProgress}%` }}
@@ -200,21 +209,21 @@ function LaneSharkGame() {
                                     </div>
                                 </div>
                             </div>
-                            <button
+
+                            <CyberButton
+                                variant="secondary"
+                                icon="📊"
                                 onClick={() => setShowProgressionPanel(true)}
-                                className="btn-glass p-3 rounded-xl border border-purple-500/30 hover:scale-110 transition-transform hover:bg-purple-600/20"
                                 title="STATS & ACHIEVEMENTS"
-                            >
-                                📊
-                            </button>
-                            <button
+                            />
+
+                            <CyberButton
+                                variant="glass"
+                                label="SHOP"
+                                icon="🛒"
                                 onClick={() => setIsShopOpen(true)}
-                                className="btn-glass p-3 rounded-xl border border-white/20 hover:scale-110 transition-transform flex items-center gap-2"
                                 title="PRO SHOP"
-                            >
-                                <span className="text-[10px] font-['Press_Start_2P'] hidden sm:block text-blue-200">SHOP</span>
-                                🛒
-                            </button>
+                            />
                         </div>
 
                     </div>
@@ -238,13 +247,13 @@ function LaneSharkGame() {
                     />
 
                     {inventory.profile && (
-                        <div className="absolute top-24 right-6 flex flex-col items-center z-50 animate-slide-in-right">
-                            <div className="p-1 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 shadow-xl">
+                        <div className="absolute top-24 right-6 flex flex-col items-center z-50 animate-slide-in-right group">
+                            <div className="p-1 rounded-2xl bg-gradient-to-br from-purple-500 via-blue-500 to-purple-600 shadow-xl cyber-border">
                                 {inventory.profile.avatarImage ? (
                                     <img
                                         src={inventory.profile.avatarImage}
                                         alt="Avatar"
-                                        className="w-24 h-24 rounded-xl border-2 border-white/50 object-cover bg-gray-900"
+                                        className="w-24 h-24 rounded-xl border-2 border-white/50 object-cover bg-gray-900 group-hover:scale-105 transition-transform"
                                     />
                                 ) : (
                                     <div className="w-24 h-24 rounded-xl border-2 border-white/50 bg-gray-800 flex items-center justify-center text-[8px] text-gray-500 font-['Press_Start_2P']">
@@ -254,14 +263,14 @@ function LaneSharkGame() {
                             </div>
 
                             <div className="mt-4 flex flex-col items-center">
-                                <div className="px-4 py-1.5 glass-panel rounded-full border border-white/10 mb-2">
-                                    <span className="text-[9px] font-['Press_Start_2P'] text-white">
+                                <div className="px-4 py-2 glass-morphism rounded-xl border border-white/20 mb-2 group-hover:border-blue-400/50 transition-colors">
+                                    <span className="text-[9px] font-['Press_Start_2P'] text-white tracking-widest leading-none">
                                         {inventory.profile.name}
                                     </span>
                                 </div>
-                                <div className="px-3 py-1 bg-yellow-600/40 border border-yellow-500/50 rounded-lg">
-                                    <span className="text-[7px] font-['Press_Start_2P'] text-yellow-200">
-                                        LEVEL {inventory.profile.level}
+                                <div className="px-3 py-1.5 bg-yellow-600/30 border border-yellow-500/40 rounded-lg shadow-gold-glow">
+                                    <span className="text-[7px] font-['Press_Start_2P'] text-yellow-100">
+                                        RANK: PRO BOWLER
                                     </span>
                                 </div>
                             </div>
@@ -336,73 +345,40 @@ function LaneSharkGame() {
                                 </div>
                             </div>
 
-                            {/* Right: Economy & Tools */}
-                            <div className="flex flex-col items-end gap-2">
-                                <div className="px-3 py-1.5 glass-panel border border-emerald-500/30 rounded-lg shadow-lg">
-                                    <span className="text-[9px] font-['Press_Start_2P'] text-emerald-400">
-                                        ${inventory.money.toLocaleString()}
-                                    </span>
-                                </div>
-
-                                {/* HUD XP & Level Display */}
-                                <div className="flex flex-col items-end gap-1">
-                                    {/* Level Badge */}
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center border-2 border-white/50 shadow-lg shadow-yellow-500/30">
-                                            <span className="text-[8px] font-['Press_Start_2P'] text-white">{inventory.profile?.level || 1}</span>
-                                        </div>
-                                        <div className="flex flex-col items-end">
-                                            <span className="text-[6px] font-['Press_Start_2P'] text-yellow-200/80">LEVEL</span>
-                                            <span className="text-[8px] font-['Press_Start_2P'] text-yellow-400">{inventory.profile?.level || 1}</span>
-                                        </div>
-                                    </div>
-                                    {/* XP Bar */}
-                                    <div className="glass-panel px-2 py-1.5 border border-yellow-500/30 rounded-lg flex flex-col items-center gap-1">
-                                        <span className="text-[5px] font-['Press_Start_2P'] text-gray-400 uppercase">Experience</span>
-                                        <div className="h-2 w-24 bg-black/60 rounded-full overflow-hidden relative border border-white/10">
-                                            <div
-                                                className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-300 shadow-[0_0_10px_rgba(234,179,8,0.6)] transition-all duration-700 ease-out"
-                                                style={{ width: `${game.xpProgress}%` }}
-                                            />
-                                            {/* Shine effect */}
-                                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine" />
-                                        </div>
-                                        <span className="text-[5px] font-['Press_Start_2P'] text-gray-500">{inventory.profile?.xp || 0} / {game.nextLevelXp}</span>
-                                    </div>
-                                </div>
+                            {/* Right Area: Score HUD & Navigation */}
+                            <div className="flex flex-col items-end gap-6 flex-1 max-w-2xl">
+                                <ModernScoreboard
+                                    score={currentPlayer?.score || 0}
+                                    money={inventory.money}
+                                    frame={currentPlayer?.frames.length || 1}
+                                    ball={currentPlayer?.rolls.length ? (currentPlayer.rolls.length % 2 === 0 ? 1 : 2) : 1}
+                                    playerName={currentPlayer?.name || 'Bowler'}
+                                    xpProgress={game.xpProgress}
+                                    level={inventory.profile?.level || 1}
+                                />
 
                                 {currentPlayer && !currentPlayer.isCpu && (
-                                    <div className="flex gap-2 mt-1 pointer-events-auto">
-                                        {/* Scorecard Toggle */}
-                                        <button
+                                    <div className="flex gap-3 mt-2 pointer-events-auto">
+                                        <CyberButton
+                                            variant={showScorecard ? "success" : "glass"}
+                                            icon="📋"
                                             onClick={() => setShowScorecard(!showScorecard)}
-                                            className={`p-2 rounded-lg border transition-all hover:scale-110 active:scale-95 ${showScorecard
-                                                ? 'bg-purple-600 border-white text-white shadow-lg'
-                                                : 'bg-black/40 border-white/20 text-gray-400 hover:bg-white/10'}`}
                                             title="Toggle Scorecard"
-                                        >
-                                            📋
-                                        </button>
-                                        <button
+                                        />
+                                        <CyberButton
+                                            variant={showBallSettings ? "gold" : "glass"}
+                                            icon="⚙️"
                                             onClick={() => setShowBallSettings(!showBallSettings)}
-                                            className={`p-2 rounded-lg border transition-all hover:scale-110 active:scale-95 ${showBallSettings
-                                                ? 'bg-yellow-600 border-white text-white shadow-gold-glow'
-                                                : 'bg-black/40 border-white/20 text-gray-400 hover:bg-white/10'
-                                                }`}
                                             title="Settings"
-                                        >
-                                            ⚙️
-                                        </button>
-                                        <button
+                                        />
+                                        <CyberButton
+                                            variant="secondary"
+                                            icon="🛒"
                                             onClick={() => setIsShopOpen(true)}
-                                            className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 border border-white/30 hover:scale-110 active:scale-95 shadow-lg"
                                             title="Shop"
-                                        >
-                                            🛒
-                                        </button>
+                                        />
                                     </div>
                                 )}
-
                             </div>
 
                             {/* 2. Bottom Area: Intentionally empty for bowler interaction and scorecard visibility */}
@@ -509,16 +485,7 @@ function LaneSharkGame() {
                             onComplete={() => game.setCelebration(null)}
                         />
 
-                        {/* Level Up Modal */}
-                        {game.showLevelUp && game.players[0]?.profile && (
-                            <LevelUpModal
-                                profile={game.players[0].profile}
-                                onSave={(updatedProfile) => {
-                                    game.updateProfile(updatedProfile);
-                                    game.setShowLevelUp(false);
-                                }}
-                            />
-                        )}
+                        {/* Level Up Modal - REMOVED DUPLICATE (Already rendered at top level) */}
 
                     </div>
                 </div>
