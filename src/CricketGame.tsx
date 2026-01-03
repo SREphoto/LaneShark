@@ -12,6 +12,8 @@ import { GameMode, CpuPersonality, PlayerProfile, BallMaterial } from './types';
 import { loadProgress, saveProgress } from './utils/storageUtils';
 import { SHOP_ITEMS } from './data/shopItems';
 
+import NewsTicker from './components/NewsTicker';
+import Scoreboard from './components/Scoreboard';
 import Scorecard from './components/Scorecard';
 import GameCanvas from './components/GameCanvas';
 import ImpactMessage from './components/ImpactMessage';
@@ -27,7 +29,6 @@ import LevelUpModal from './components/LevelUpModal';
 import ProgressionPanel from './components/ProgressionPanel';
 import CelebrationOverlay from './components/CelebrationOverlay';
 import CyberButton from './components/CyberButton';
-import ModernScoreboard from './components/ModernScoreboard';
 
 
 
@@ -186,6 +187,7 @@ function LaneSharkGame() {
 
             {game.currentGameState === 'MENU' && (
                 <div className="animate-fade-in h-full">
+                    <NewsTicker />
                     {/* Header */}
                     <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between px-8 z-50">
                         <div className="flex flex-col">
@@ -318,6 +320,7 @@ function LaneSharkGame() {
 
                             {/* Center: Title (Hidden on small mobile) & Messages */}
                             <div className="flex flex-col items-center flex-1 mx-4">
+                                <NewsTicker />
                                 <h1 className="hidden md:block text-xs font-['Press_Start_2P'] gradient-text shadow-glow-effect mb-2">LANESHARK</h1>
 
                                 {/* Dynamic Message Area */}
@@ -347,14 +350,10 @@ function LaneSharkGame() {
 
                             {/* Right Area: Score HUD & Navigation */}
                             <div className="flex flex-col items-end gap-6 flex-1 max-w-2xl">
-                                <ModernScoreboard
+                                <Scoreboard
                                     score={currentPlayer?.score || 0}
-                                    money={inventory.money}
                                     frame={currentPlayer?.frames.length || 1}
-                                    ball={currentPlayer?.rolls.length ? (currentPlayer.rolls.length % 2 === 0 ? 1 : 2) : 1}
-                                    playerName={currentPlayer?.name || 'Bowler'}
-                                    xpProgress={game.xpProgress}
-                                    level={inventory.profile?.level || 1}
+                                    throwInFrame={currentPlayer?.rolls.length ? (currentPlayer.rolls.length % 2 === 0 ? 1 : 2) : 1}
                                 />
 
                                 {currentPlayer && !currentPlayer.isCpu && (

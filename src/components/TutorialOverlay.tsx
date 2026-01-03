@@ -17,21 +17,21 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ step, onNext, onSkip 
     const isLast = step === TUTORIAL_STEPS.length - 1;
 
     return (
-        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black bg-opacity-80 p-4 pointer-events-auto">
-            <div className="bg-gray-900 border-2 border-blue-400 p-6 max-w-sm w-full text-center shadow-[0_0_30px_rgba(59,130,246,0.3)] animate-bounce-in">
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black p-4 pointer-events-auto">
+            <div className="bg-black border-4 border-blue-400 p-6 max-w-sm w-full text-center shadow-[8px_8px_0_rgba(0,0,0,0.5)]">
                 <h3 className="text-xl text-yellow-400 font-['Press_Start_2P'] mb-4">{content.title}</h3>
-                <p className="text-white font-sans text-lg mb-8 leading-relaxed">{content.text}</p>
+                <p className="text-white font-['Press_Start_2P'] text-[10px] mb-8 leading-relaxed">{content.text}</p>
 
                 <div className="flex justify-center gap-4">
                     <button
                         onClick={onSkip}
-                        className="px-4 py-2 border border-gray-500 text-gray-400 hover:text-white font-['Press_Start_2P'] text-xs"
+                        className="btn-retro !border-gray-500 px-4 py-2 text-gray-400 text-xs"
                     >
                         SKIP
                     </button>
                     <button
                         onClick={onNext}
-                        className="px-6 py-2 bg-blue-600 border-2 border-white text-white font-['Press_Start_2P'] text-xs hover:bg-blue-500 shadow-lg"
+                        className="btn-retro !border-blue-500 px-6 py-2 text-white text-xs"
                     >
                         {isLast ? "PLAY" : "NEXT >"}
                     </button>

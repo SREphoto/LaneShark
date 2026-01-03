@@ -51,85 +51,46 @@ const LevelUpModal: React.FC<LevelUpModalProps> = ({ profile, onSave }) => {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
-            {/* Animated Background with Particles */}
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/95 via-black/98 to-purple-950/95 backdrop-blur-xl">
-                {/* Particle Effects */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    {Array.from({ length: 30 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute w-2 h-2 rounded-full animate-pulse"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                                backgroundColor: ['#34d399', '#fbbf24', '#a78bfa', '#60a5fa'][i % 4],
-                                animation: `float ${2 + Math.random() * 3}s ease-in-out infinite`,
-                                animationDelay: `${Math.random() * 2}s`,
-                                opacity: 0.5 + Math.random() * 0.5
-                            }}
-                        />
-                    ))}
-                </div>
-                {/* Radial glow behind modal */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/20 rounded-full blur-[120px]" />
-            </div>
+            {/* Solid Retro Background */}
+            <div className="absolute inset-0 bg-black/90" />
 
-            <div className="relative w-full max-w-lg glass-card p-8 flex flex-col animate-slide-up border-2 border-emerald-400/50 bg-black/70 shadow-2xl rounded-2xl overflow-hidden">
-
-                {/* Glowing Corner Accents */}
-                <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-emerald-400 rounded-tl-2xl" />
-                <div className="absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 border-emerald-400 rounded-tr-2xl" />
-                <div className="absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 border-emerald-400 rounded-bl-2xl" />
-                <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-emerald-400 rounded-br-2xl" />
+            <div className="relative w-full max-w-lg border-4 border-white bg-[#000] p-8 flex flex-col animate-slide-up shadow-[12px_12px_0_rgba(0,0,0,0.5)]">
 
                 {/* Header Section */}
                 <div className="text-center mb-6 relative">
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl animate-pulse" />
-
                     {/* Level Badge */}
                     <div className="relative inline-flex items-center justify-center mb-4">
-                        <div className="absolute w-28 h-28 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full blur-md animate-pulse" />
-                        <div className="relative w-24 h-24 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center border-4 border-white/40 shadow-2xl">
-                            <span className="text-4xl font-['Press_Start_2P'] text-white drop-shadow-lg">{profile.level}</span>
+                        <div className="w-24 h-24 bg-emerald-600 flex items-center justify-center border-4 border-white shadow-[4px_4px_0_rgba(0,0,0,0.5)]">
+                            <span className="text-4xl font-['Press_Start_2P'] text-white">{profile.level}</span>
                         </div>
                     </div>
 
-                    <h2 className="relative text-4xl font-['Press_Start_2P'] text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-green-400 to-emerald-300 mb-3 animate-pulse">
+                    <h2 className="relative text-4xl font-['Press_Start_2P'] text-emerald-400 mb-3 uppercase">
                         LEVEL UP!
                     </h2>
-                    <p className="text-[10px] font-['Press_Start_2P'] text-emerald-200/80 tracking-widest">
-                        You've reached new heights!
-                    </p>
                 </div>
 
                 {/* Reward Summary */}
-                <div className="glass-panel bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-4 mb-6">
+                <div className="border-4 border-emerald-900 bg-emerald-950/20 p-4 mb-6">
                     <div className="flex justify-between items-center mb-3">
                         <span className="text-[9px] font-['Press_Start_2P'] text-gray-400">REWARD</span>
                         <span className="text-[9px] font-['Press_Start_2P'] text-emerald-400">+2 STAT POINTS</span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="flex-1 text-center py-2 bg-black/30 rounded-lg border border-white/5">
+                        <div className="flex-1 text-center py-2 bg-black border-2 border-white/10">
                             <span className="text-[8px] font-['Press_Start_2P'] text-gray-500 block mb-1">AVAILABLE</span>
-                            <span className="text-2xl font-['Press_Start_2P'] text-yellow-400 animate-bounce">{points}</span>
-                        </div>
-                        <div className="flex-1 text-center py-2 bg-black/30 rounded-lg border border-white/5">
-                            <span className="text-[8px] font-['Press_Start_2P'] text-gray-500 block mb-1">TOTAL XP</span>
-                            <span className="text-lg font-['Press_Start_2P'] text-emerald-300">{profile.xp}</span>
+                            <span className="text-2xl font-['Press_Start_2P'] text-yellow-400">{points}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Stats List - Compact */}
-                <div className="grid grid-cols-2 gap-3 mb-6 max-h-[240px] overflow-y-auto custom-shop-scrollbar pr-1">
+                {/* Stats List */}
+                <div className="grid grid-cols-1 gap-3 mb-6">
                     {(Object.keys(stats) as Array<keyof PlayerStats>).map(key => (
-                        <div key={key} className="glass-panel p-3 flex items-center justify-between transition-all hover:bg-emerald-900/20 border border-white/5 hover:border-emerald-500/30 rounded-lg">
+                        <div key={key} className="border-4 border-gray-800 bg-gray-950 p-3 flex items-center justify-between">
                             <div className="flex flex-col">
                                 <span className="text-[8px] font-['Press_Start_2P'] text-blue-400 uppercase">
                                     {STAT_LABELS[key]}
-                                </span>
-                                <span className="text-[6px] font-['Press_Start_2P'] text-gray-600 mt-0.5">
-                                    {STAT_DESCS[key]}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -139,12 +100,12 @@ const LevelUpModal: React.FC<LevelUpModalProps> = ({ profile, onSave }) => {
                                 <button
                                     onClick={() => handleIncrement(key)}
                                     disabled={points === 0}
-                                    className={`w-8 h-8 flex items-center justify-center rounded-lg border-2 transition-all active:scale-90 ${points > 0
-                                        ? 'bg-gradient-to-br from-emerald-500 to-green-600 border-white/40 text-white shadow-lg hover:shadow-emerald-500/50'
-                                        : 'bg-gray-900/50 border-white/10 text-gray-700 cursor-not-allowed'
+                                    className={`w-8 h-8 flex items-center justify-center border-2 ${points > 0
+                                        ? 'bg-emerald-600 border-white text-white'
+                                        : 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed'
                                         }`}
                                 >
-                                    <span className="text-lg leading-none font-bold">+</span>
+                                    <span className="text-lg font-bold">+</span>
                                 </button>
                             </div>
                         </div>
@@ -154,9 +115,9 @@ const LevelUpModal: React.FC<LevelUpModalProps> = ({ profile, onSave }) => {
                 {/* Confirm Button */}
                 <button
                     onClick={handleConfirm}
-                    className="btn-primary w-full py-4 text-sm font-['Press_Start_2P'] tracking-wider bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 border-2 border-white/30 rounded-xl shadow-lg shadow-emerald-500/30 group transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="btn-retro !bg-emerald-600 !border-white w-full py-4 text-sm font-['Press_Start_2P']"
                 >
-                    <span className="group-hover:scale-110 transition-transform block">✨ UNLOCK POTENTIAL ✨</span>
+                    CONFIRM STATS
                 </button>
             </div>
         </div>

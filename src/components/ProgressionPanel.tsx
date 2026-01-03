@@ -86,7 +86,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                 <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                     {/* Lifetime Stats */}
-                    <div className="glass-panel p-5 rounded-xl border border-white/10">
+                    <div className="border-4 border-gray-800 bg-gray-950 p-5 shadow-[4px_4px_0_rgba(0,0,0,0.5)]">
                         <h3 className="text-sm font-['Press_Start_2P'] text-purple-400 mb-4">📊 LIFETIME STATS</h3>
                         <div className="grid grid-cols-2 gap-3">
                             <StatBox label="Games Played" value={stats.gamesPlayed} icon="🎳" />
@@ -99,7 +99,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                     </div>
 
                     {/* Next Milestone */}
-                    <div className="glass-panel p-5 rounded-xl border border-white/10">
+                    <div className="border-4 border-gray-800 bg-gray-950 p-5 shadow-[4px_4px_0_rgba(0,0,0,0.5)]">
                         <h3 className="text-sm font-['Press_Start_2P'] text-emerald-400 mb-4">🎯 NEXT MILESTONE</h3>
                         {nextMilestone ? (
                             <div className="flex flex-col gap-3">
@@ -127,7 +127,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                     </div>
 
                     {/* Daily Challenges */}
-                    <div className="glass-panel p-5 rounded-xl border border-white/10">
+                    <div className="border-4 border-gray-800 bg-gray-950 p-5 shadow-[4px_4px_0_rgba(0,0,0,0.5)]">
                         <h3 className="text-sm font-['Press_Start_2P'] text-blue-400 mb-4">📅 DAILY CHALLENGES</h3>
                         <div className="space-y-3">
                             {DAILY_CHALLENGES.slice(0, 3).map(challenge => {
@@ -157,7 +157,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                     </div>
 
                     {/* Next Achievements */}
-                    <div className="glass-panel p-5 rounded-xl border border-white/10">
+                    <div className="border-4 border-gray-800 bg-gray-950 p-5 shadow-[4px_4px_0_rgba(0,0,0,0.5)]">
                         <h3 className="text-sm font-['Press_Start_2P'] text-yellow-400 mb-4">🏅 NEXT ACHIEVEMENTS</h3>
                         <div className="space-y-3">
                             {getNextAchievements().map(achievement => {
@@ -200,7 +200,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                     </div>
 
                     {/* Unlocked Achievements */}
-                    <div className="lg:col-span-2 glass-panel p-5 rounded-xl border border-white/10">
+                    <div className="lg:col-span-2 border-4 border-gray-800 bg-gray-950 p-5 shadow-[4px_4px_0_rgba(0,0,0,0.5)]">
                         <h3 className="text-sm font-['Press_Start_2P'] text-purple-400 mb-4">🏆 UNLOCKED ({unlockedAchievements.length}/{ACHIEVEMENTS.length})</h3>
                         <div className="flex flex-wrap gap-2">
                             {unlockedAchievements.length === 0 ? (

@@ -16,14 +16,12 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
     return (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-
-            <div className="relative w-full max-w-lg glass-card p-10 flex flex-col items-center animate-slide-up">
+            <div className="relative w-full max-w-lg border-4 border-white bg-[#000] p-10 flex flex-col items-center animate-slide-up shadow-[10px_10px_0_rgba(0,0,0,0.5)]">
                 <div className="mb-8 text-center">
-                    <h2 className="text-3xl font-['Press_Start_2P'] gradient-text mb-2">
+                    <h2 className="text-3xl font-['Press_Start_2P'] text-white mb-2">
                         LANESHARK
                     </h2>
-                    <p className="text-[10px] text-gray-400 font-['Press_Start_2P'] tracking-wider">
+                    <p className="text-[10px] text-gray-500 font-['Press_Start_2P'] tracking-wider">
                         CHOOSE YOUR CHAMPIONSHIP MODE
                     </p>
                 </div>
@@ -31,16 +29,16 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
                 <div className="w-full flex flex-col gap-4 mb-8">
                     <button
                         onClick={() => onSelectMode('SOLO')}
-                        className="btn-primary w-full text-lg group overflow-hidden"
+                        className="btn-retro w-full py-4 flex items-center justify-center gap-4 group"
                     >
-                        <span className="relative z-10 font-['Press_Start_2P']">🕹️ 1 PLAYER SOLO</span>
+                        <span className="font-['Press_Start_2P'] text-sm">🕹️ 1 PLAYER SOLO</span>
                     </button>
 
                     <button
                         onClick={() => onSelectMode('TWO_PLAYER')}
-                        className="btn-success w-full text-lg group"
+                        className="btn-retro w-full py-4 flex items-center justify-center gap-4 group !border-blue-500"
                     >
-                        <span className="relative z-10 font-['Press_Start_2P']">🤜🤛 2 PLAYER VS</span>
+                        <span className="font-['Press_Start_2P'] text-sm">🤜🤛 2 PLAYER VS</span>
                     </button>
                 </div>
 
@@ -56,12 +54,12 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onSelectMode }) => {
                             <button
                                 key={cpu.id}
                                 onClick={() => onSelectMode('VS_CPU', cpu)}
-                                className="glass-panel p-4 flex flex-col items-center justify-center gap-2 hover:border-purple-500 transition-all hover:scale-105 group"
+                                className="border-4 border-gray-800 bg-gray-950 p-4 flex flex-col items-center justify-center gap-2 hover:border-purple-500 transition-all active:translate-y-1 active:shadow-none shadow-[4px_4px_0_rgba(0,0,0,0.5)] group"
                             >
-                                <div className="text-[10px] text-white font-['Press_Start_2P'] group-hover:text-purple-300">
+                                <div className="text-[10px] text-gray-400 font-['Press_Start_2P'] group-hover:text-purple-300">
                                     {cpu.name.split(' ')[0]}
                                 </div>
-                                <div className="px-2 py-1 bg-purple-900/40 border border-purple-500 rounded text-[8px] text-purple-200 font-['Press_Start_2P']">
+                                <div className="px-2 py-1 bg-purple-900 border-2 border-purple-500 text-[8px] text-purple-200 font-['Press_Start_2P']">
                                     LVL {Math.round(cpu.difficulty * 10)}
                                 </div>
                             </button>

@@ -16,9 +16,16 @@ const ImpactMessage: React.FC<ImpactMessageProps> = ({ message, isVisible }) => 
   }
 
   return (
-    <div className="impact-message-overlay" aria-live="assertive" role="alert">
-      <div className="impact-message-text bloom chromatic-aberration">
-        {message}
+    <div className="flex flex-col items-center animate-bounce">
+      <div className="relative border-4 border-white bg-black p-8 shadow-[8px_8px_0_rgba(0,0,0,0.5)]">
+        <h1 className="text-8xl md:text-9xl font-['Press_Start_2P'] text-yellow-500 tracking-tighter">
+          STRIKE!
+        </h1>
+      </div>
+      <div className="flex gap-4 mt-8">
+        <span className="text-5xl">⚡</span>
+        <span className="text-6xl">🎳</span>
+        <span className="text-5xl">⚡</span>
       </div>
     </div>
   );

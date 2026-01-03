@@ -16,41 +16,33 @@ interface StatisticsScreenProps {
 const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ stats, profile, onClose }) => {
     return (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 animate-fade-in bg-black/80 backdrop-blur-xl pointer-events-auto">
-            <div className="relative w-full max-w-lg glass-card p-10 flex flex-col animate-slide-up bg-[#1a1a2e]/60 border-2 border-yellow-500/30">
+            <div className="relative w-full max-w-lg border-4 border-white bg-[#000] p-10 flex flex-col animate-slide-up shadow-[12px_12px_0_rgba(0,0,0,0.5)]">
 
                 {/* Header */}
-                <div className="text-center mb-10 bloom chromatic-aberration">
-                    <h2 className="text-4xl font-['Press_Start_2P'] gradient-text mb-2 tracking-tighter">
-                        TOURNAMENT RESULTS
+                <div className="text-center mb-10">
+                    <h2 className="text-4xl font-['Press_Start_2P'] text-white mb-2 tracking-tighter uppercase">
+                        RESULTS
                     </h2>
-                    <div className="h-1 w-24 bg-yellow-500 mx-auto rounded-full shadow-gold-glow" />
+                    <div className="h-2 w-24 bg-yellow-500 mx-auto" />
                 </div>
 
                 {/* Game Stats */}
-                <div className="space-y-6 mb-10">
-                    <div className="glass-panel p-6 flex justify-between items-center group hover:bg-white/5 transition-all">
-                        <span className="text-[10px] font-['Press_Start_2P'] text-gray-400 group-hover:text-white">FINAL SCORE</span>
-                        <span className="text-3xl font-['Press_Start_2P'] gold-text shadow-gold-glow animate-pulse">
+                <div className="space-y-4 mb-10">
+                    <div className="border-4 border-gray-800 bg-gray-950 p-6 flex justify-between items-center group">
+                        <span className="text-[10px] font-['Press_Start_2P'] text-gray-400">FINAL SCORE</span>
+                        <span className="text-3xl font-['Press_Start_2P'] text-yellow-400">
                             {stats.totalScore.toLocaleString()}
                         </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="glass-panel p-4 flex flex-col items-center gap-2">
+                        <div className="border-4 border-gray-800 bg-gray-950 p-4 flex flex-col items-center gap-2">
                             <span className="text-[8px] font-['Press_Start_2P'] text-emerald-400">STRIKES</span>
                             <span className="text-lg font-['Press_Start_2P'] text-white">{stats.strikes}</span>
                         </div>
-                        <div className="glass-panel p-4 flex flex-col items-center gap-2">
+                        <div className="border-4 border-gray-800 bg-gray-950 p-4 flex flex-col items-center gap-2">
                             <span className="text-[8px] font-['Press_Start_2P'] text-blue-400">SPARES</span>
                             <span className="text-lg font-['Press_Start_2P'] text-white">{stats.spares}</span>
-                        </div>
-                        <div className="glass-panel p-4 flex flex-col items-center gap-2">
-                            <span className="text-[8px] font-['Press_Start_2P'] text-purple-400">ACCURACY</span>
-                            <span className="text-sm font-['Press_Start_2P'] text-white">{stats.accuracy.toFixed(1)}%</span>
-                        </div>
-                        <div className="glass-panel p-4 flex flex-col items-center gap-2">
-                            <span className="text-[8px] font-['Press_Start_2P'] text-red-400">GUTTERS</span>
-                            <span className="text-sm font-['Press_Start_2P'] text-white">{stats.gutters}</span>
                         </div>
                     </div>
                 </div>

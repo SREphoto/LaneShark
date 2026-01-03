@@ -32,33 +32,26 @@ const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({ type, onComplet
         switch (type) {
             case 'STRIKE':
                 return (
-                    <div className="flex flex-col items-center animate-bounce-in">
-                        <div className="relative group">
-                            <h1 className="text-8xl md:text-9xl font-black italic text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-500 to-orange-600 drop-shadow-[0_0_35px_rgba(234,179,8,1)] transform -skew-x-12 tracking-tighter">
+                    <div className="flex flex-col items-center animate-bounce">
+                        <div className="relative border-4 border-white bg-black p-8 shadow-[8px_8px_0_rgba(0,0,0,0.5)]">
+                            <h1 className="text-8xl md:text-9xl font-['Press_Start_2P'] text-yellow-500 tracking-tighter">
                                 STRIKE!
                             </h1>
-                            <div className="absolute -inset-10 bg-yellow-400/30 blur-[60px] rounded-full animate-pulse group-hover:bg-yellow-400/50" />
-                            <div className="absolute -inset-4 border-4 border-yellow-300/20 rounded-2xl animate-ping opacity-30" />
                         </div>
-                        <div className="flex gap-4 mt-8 animate-bounce">
-                            <span className="text-5xl drop-shadow-glow">⚡</span>
-                            <span className="text-6xl drop-shadow-glow">🎳</span>
-                            <span className="text-5xl drop-shadow-glow">⚡</span>
+                        <div className="flex gap-4 mt-8">
+                            <span className="text-5xl">⚡</span>
+                            <span className="text-6xl">🎳</span>
+                            <span className="text-5xl">⚡</span>
                         </div>
-                        <div className="text-yellow-200 font-['Press_Start_2P'] text-[10px] mt-6 tracking-[0.4em] uppercase opacity-70">Immortal Roll</div>
                     </div>
                 );
             case 'SPARE':
                 return (
                     <div className="flex flex-col items-center animate-slide-in-right">
-                        <div className="relative">
-                            <h1 className="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-600 drop-shadow-[0_0_25px_rgba(59,130,246,0.8)]">
+                        <div className="border-4 border-blue-500 bg-black p-6 shadow-[6px_6px_0_rgba(0,0,0,0.5)]">
+                            <h1 className="text-7xl md:text-8xl font-['Press_Start_2P'] text-blue-400">
                                 SPARE
                             </h1>
-                            <div className="absolute -inset-4 bg-blue-500/10 blur-2xl rounded-lg animate-pulse" />
-                        </div>
-                        <div className="mt-4 px-6 py-2 bg-blue-500/20 border border-blue-400/30 rounded-full">
-                            <div className="text-2xl text-blue-100 font-bold tracking-widest animate-pulse">CLEAN UP!</div>
                         </div>
                     </div>
                 );
@@ -126,7 +119,7 @@ const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({ type, onComplet
 
     return (
         <div className={`fixed inset-0 z-[100] flex items-center justify-center pointer-events-none transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-[6px]" />
+            <div className="absolute inset-0 bg-black/80" />
 
             {/* Ambient Background VFX Patterns */}
             <div className="absolute inset-0 opacity-10 pointer-events-none">

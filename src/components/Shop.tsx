@@ -54,11 +54,10 @@ const Shop: React.FC<ShopProps> = ({ inventory, onBuy, onEquip, onCheatMoney, on
             <div className="relative w-full max-w-6xl h-[90vh] flex gap-4 animate-slide-up">
 
                 {/* PREVIEW PANEL */}
-                <div className="hidden lg:flex flex-col w-80 glass-panel p-6 border-white/10 shrink-0">
-                    <h3 className="text-xl font-['Press_Start_2P'] gradient-text mb-8 text-center">PREVIEW</h3>
+                <div className="hidden lg:flex flex-col w-80 border-4 border-white bg-[#111] p-6 shrink-0 shadow-[8px_8px_0_rgba(0,0,0,0.5)]">
+                    <h3 className="text-xl font-['Press_Start_2P'] text-white mb-8 text-center uppercase tracking-tight">PREVIEW</h3>
 
-                    <div className="flex-1 flex flex-col items-center justify-center relative">
-                        <div className="absolute inset-0 bg-blue-500/5 rounded-3xl blur-3xl animate-pulse" />
+                    <div className="flex-1 flex flex-col items-center justify-center relative bg-black/50 border-2 border-white/10">
                         <CharacterPreview equippedOutfitId={activePreviewId || undefined} width={250} height={400} scale={3} />
 
                         <div className="mt-8 text-center">
@@ -77,9 +76,9 @@ const Shop: React.FC<ShopProps> = ({ inventory, onBuy, onEquip, onCheatMoney, on
                 </div>
 
                 {/* ITEMS PANEL */}
-                <div className="flex-1 flex flex-col glass-panel overflow-hidden border-white/10">
+                <div className="flex-1 flex flex-col border-4 border-white bg-[#111] overflow-hidden shadow-[8px_8px_0_rgba(0,0,0,0.5)]">
                     {/* Header */}
-                    <div className="p-6 border-b border-white/10 bg-black/20">
+                    <div className="p-6 border-b-4 border-white bg-black/20">
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h2 className="text-2xl font-['Press_Start_2P'] text-white mb-2">🏪 PRO SHOP</h2>
@@ -92,12 +91,12 @@ const Shop: React.FC<ShopProps> = ({ inventory, onBuy, onEquip, onCheatMoney, on
 
                         {/* Money & Stats */}
                         <div className="flex items-center gap-4">
-                            <div className="flex-1 bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-xl flex items-center justify-between px-6">
-                                <span className="text-[8px] font-['Press_Start_2P'] text-emerald-400">BANK BALANCE:</span>
-                                <span className="text-xl font-['Press_Start_2P'] gold-text">${inventory.money.toLocaleString()}</span>
+                            <div className="flex-1 bg-black border-2 border-emerald-500 p-3 flex items-center justify-between px-6">
+                                <span className="text-[8px] font-['Press_Start_2P'] text-emerald-500">BANK BALANCE:</span>
+                                <span className="text-xl font-['Press_Start_2P'] text-yellow-400">${inventory.money.toLocaleString()}</span>
                             </div>
                             {onCheatMoney && (
-                                <button onClick={onCheatMoney} className="bg-purple-600 hover:bg-purple-500 px-4 py-3 rounded-xl text-[10px] font-['Press_Start_2P'] text-white transition-all shadow-purple-glow animate-pulse-glow">
+                                <button onClick={onCheatMoney} className="btn-retro !bg-purple-900 border-purple-500 px-4 py-3 text-[10px] text-white">
                                     💰 +1K
                                 </button>
                             )}
@@ -133,7 +132,7 @@ const Shop: React.FC<ShopProps> = ({ inventory, onBuy, onEquip, onCheatMoney, on
                                         key={item.id}
                                         onMouseEnter={() => item.category === 'CLOTHING' && setPreviewItemId(item.id)}
                                         onMouseLeave={() => setPreviewItemId(null)}
-                                        className={`p-4 rounded-xl border-2 transition-all group ${isOwned ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/10 bg-white/5 hover:border-blue-500/40 hover:bg-white/10'}`}
+                                        className={`p-4 border-4 transition-all group ${isOwned ? 'border-emerald-500 bg-emerald-950/20' : 'border-gray-800 bg-black hover:border-blue-500'}`}
                                     >
                                         <div className="flex justify-between items-start mb-2">
                                             <h3 className="text-[11px] font-['Press_Start_2P'] text-yellow-400 leading-tight group-hover:text-yellow-300">
@@ -182,8 +181,8 @@ const Shop: React.FC<ShopProps> = ({ inventory, onBuy, onEquip, onCheatMoney, on
                     </div>
 
                     {/* Footer */}
-                    <div className="p-4 bg-black/40 border-t border-white/10 flex justify-center">
-                        <button onClick={onClose} className="btn-danger w-full max-w-xs py-3 text-[10px] font-['Press_Start_2P']">EXIT PRO SHOP</button>
+                    <div className="p-4 bg-black border-t-4 border-white flex justify-center">
+                        <button onClick={onClose} className="btn-retro !border-red-500 w-full max-w-xs py-3 text-[10px] font-['Press_Start_2P']">EXIT PRO SHOP</button>
                     </div>
                 </div>
             </div>

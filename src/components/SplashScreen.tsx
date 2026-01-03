@@ -63,15 +63,12 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
             {/* Animated Logo Container */}
             <div className={`flex flex-col items-center transition-all duration-1000 transform ${stage >= 1 ? 'scale-110 opacity-100' : 'scale-75 opacity-0'}`}>
 
-                {/* Logo Halo */}
-                <div className="absolute w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-
                 {/* Main Title */}
-                <div className="relative mb-4 flex flex-col items-center bloom chromatic-aberration">
+                <div className="relative mb-4 flex flex-col items-center">
                     <h1 className="text-6xl font-['Press_Start_2P'] text-white tracking-tighter shadow-2xl">
                         LANE
                     </h1>
-                    <h1 className="text-6xl font-['Press_Start_2P'] gradient-text tracking-tighter mt-[-10px]">
+                    <h1 className="text-6xl font-['Press_Start_2P'] text-blue-500 tracking-tighter mt-[-10px]">
                         SHARK!
                     </h1>
                 </div>
@@ -102,8 +99,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
             {/* Credits Modal */}
             {
                 showCredits && (
-                    <div className="absolute inset-0 z-[300] bg-black/95 flex items-center justify-center p-6 animate-fade-in" onClick={(e) => e.stopPropagation()}>
-                        <div className="max-w-md w-full border border-white/20 bg-[#0f0c29] p-8 rounded-2xl shadow-2xl relative">
+                    <div className="absolute inset-0 z-[300] bg-black flex items-center justify-center p-6" onClick={(e) => e.stopPropagation()}>
+                        <div className="max-w-md w-full border-4 border-white bg-[#000] p-8 relative">
                             <button
                                 onClick={handleCloseCredits}
                                 className="absolute top-4 right-4 text-red-500 hover:scale-125 transition-transform"

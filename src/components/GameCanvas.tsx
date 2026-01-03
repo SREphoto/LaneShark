@@ -54,26 +54,25 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         const ctx = c.getContext('2d');
         if (!ctx) return null;
 
-        // Base Wood
-        const woodGradient = ctx.createLinearGradient(0, 0, c.width, 0);
-        woodGradient.addColorStop(0, '#eaccad');
-        woodGradient.addColorStop(0.2, '#d6a87c');
-        woodGradient.addColorStop(0.5, '#cba274');
-        woodGradient.addColorStop(0.8, '#d6a87c');
-        woodGradient.addColorStop(1, '#eaccad');
-        ctx.fillStyle = woodGradient;
+        // Retro Wood Pattern (Tiled/Pixelated)
+        ctx.fillStyle = '#d6a87c';
         ctx.fillRect(0, 0, c.width, c.height);
 
-        // Boards
-        const boardWidth = c.width / 7; // Fewer boards for wider single lane
-        for (let i = 0; i < 7; i++) {
-            if (i % 2 === 0) {
-                ctx.fillStyle = 'rgba(0,0,0,0.03)';
-                ctx.fillRect(i * boardWidth, 0, boardWidth, c.height);
-            }
-            ctx.fillStyle = 'rgba(0,0,0,0.1)';
-            ctx.fillRect(i * boardWidth, 0, 1, c.height);
+        // Boards with solid lines
+        const boardWidth = c.width / 10;
+        for (let i = 0; i < 10; i++) {
+            ctx.fillStyle = i % 2 === 0 ? '#cba274' : '#d6a87c';
+            ctx.fillRect(i * boardWidth, 0, boardWidth, c.height);
+            ctx.fillStyle = '#a67c52';
+            ctx.fillRect(i * boardWidth, 0, 2, c.height);
         }
+
+        // Add some "grain" pixels
+        for (let i = 0; i < 100; i++) {
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(Math.random() * c.width, Math.random() * c.height, 2, 8);
+        }
+        return c;
         return c;
     }, []);
 
@@ -158,14 +157,21 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.rotate(pin.angle);
         ctx.globalAlpha = pin.isDown ? 0.3 : 1.0;
 
+        // Pixel Art Pin
         ctx.fillStyle = '#fff';
-        ctx.beginPath();
-        ctx.arc(0, -PIN_RADIUS, PIN_RADIUS * 0.6, 0, Math.PI * 2); // Head
-        ctx.arc(0, 0, PIN_RADIUS, 0, Math.PI * 2); // Body
-        ctx.fill();
+        // Base
+        ctx.fillRect(-8, -2, 16, 4);
+        // Body (Blocky)
+        ctx.fillRect(-10, -12, 20, 10);
+        ctx.fillRect(-8, -18, 16, 6);
+        // Neck
+        ctx.fillRect(-5, -24, 10, 6);
+        // Head
+        ctx.fillRect(-7, -32, 14, 8);
 
+        // Stripe
         ctx.fillStyle = '#e53e3e';
-        ctx.fillRect(-PIN_RADIUS, -PIN_RADIUS * 1.2, PIN_RADIUS * 2, 4);
+        ctx.fillRect(-5, -22, 10, 4);
         ctx.restore();
     };
 
@@ -175,17 +181,52 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
         ctx.save();
         ctx.translate(x, y - animY);
-        ctx.scale(1.5, 1.5); // Bigger Bowler
-        ctx.rotate(angle * Math.PI / 180 * 0.1); // Small lean
+        ctx.scale(1.5, 1.5);
 
-        // Simple Pixel Bowler
-        ctx.fillStyle = '#1a1a1a'; ctx.fillRect(-8, 0, 6, 15); ctx.fillRect(2, 0, 6, 15); // Legs
-        ctx.fillStyle = '#4834d4'; ctx.fillRect(-12, -25, 24, 25); // Body
-        ctx.fillStyle = '#ffdbac'; ctx.fillRect(-8, -45, 16, 20); // Head
-        ctx.fillStyle = '#000'; ctx.fillRect(-8, -45, 16, 5); // Hair
+        // 16-bit Sprite Style Bowler
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(-12, 10, 24, 6);
+
+        // Shoes
+        ctx.fillStyle = '#000';
+        ctx.fillRect(-10, 5, 8, 5);
+        ctx.fillRect(2, 5, 8, 5);
+
+        // Pants
+        ctx.fillStyle = '#222';
+        ctx.fillRect(-10, -5, 20, 10);
+
+        // Shirt
+        ctx.fillStyle = '#4834d4';
+        ctx.fillRect(-12, -25, 24, 20);
+        ctx.fillStyle = '#5f27cd'; // Shirt Highlights
+        ctx.fillRect(-12, -25, 4, 15);
+
+        // Arms
+        ctx.fillStyle = '#ffdbac';
+        ctx.fillRect(-16, -20, 6, 12); // Left
+        ctx.fillRect(10, -20, 6, 12);  // Right
+
+        // Head
+        ctx.fillStyle = '#ffdbac';
+        ctx.fillRect(-8, -40, 16, 15);
+        // Hair
+        ctx.fillStyle = '#2d3436';
+        ctx.fillRect(-10, -42, 20, 6);
+        // Eyes
+        ctx.fillStyle = '#000';
+        ctx.fillRect(-4, -34, 2, 2);
+        ctx.fillRect(2, -34, 2, 2);
 
         if (isHoldingBall) {
-            ctx.fillStyle = BALL_COLOR; ctx.beginPath(); ctx.arc(15, -15, 10, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#34495e'; // Heavy charcoal ball
+            ctx.fillRect(12, -15, 12, 12);
+            // Holes
+            ctx.fillStyle = '#000';
+            ctx.fillRect(15, -12, 2, 2);
+            ctx.fillRect(19, -12, 2, 2);
+            ctx.fillRect(17, -8, 2, 2);
         }
         ctx.restore();
     };
