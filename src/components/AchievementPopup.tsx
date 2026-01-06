@@ -32,12 +32,7 @@ const AchievementPopup: React.FC<AchievementPopupProps> = ({ achievement, onDism
     return (
         <div className={`fixed top-8 right-8 z-[90] transition-all duration-500 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
             <div
-                className="relative p-6 rounded-2xl border-2 backdrop-blur-xl shadow-2xl min-w-[320px]"
-                style={{
-                    backgroundColor: `${tierStyle.bg}ee`,
-                    borderColor: tierStyle.border,
-                    boxShadow: `0 0 40px ${tierStyle.glow}, inset 0 0 20px ${tierStyle.glow}`
-                }}
+                className={`relative p-6 rounded-2xl border-2 backdrop-blur-xl shadow-2xl min-w-[320px] tier-bg-${achievement.tier.toLowerCase()}`}
             >
                 {/* Shine effect */}
                 <div className="absolute inset-0 rounded-2xl overflow-hidden">
@@ -47,12 +42,7 @@ const AchievementPopup: React.FC<AchievementPopupProps> = ({ achievement, onDism
                 {/* Achievement Badge */}
                 <div className="flex items-start gap-4 relative">
                     <div
-                        className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl border-2 shadow-lg"
-                        style={{
-                            backgroundColor: `${tierStyle.bg}`,
-                            borderColor: tierStyle.border,
-                            boxShadow: `0 0 15px ${tierStyle.glow}`
-                        }}
+                        className={`w-16 h-16 rounded-xl flex items-center justify-center text-3xl border-2 shadow-lg tier-bg-${achievement.tier.toLowerCase()}`}
                     >
                         {achievement.icon}
                     </div>
@@ -60,21 +50,14 @@ const AchievementPopup: React.FC<AchievementPopupProps> = ({ achievement, onDism
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                             <span
-                                className="text-[8px] font-['Press_Start_2P'] uppercase tracking-widest px-2 py-0.5 rounded"
-                                style={{
-                                    backgroundColor: tierStyle.border,
-                                    color: tierStyle.bg
-                                }}
+                                className={`tier-stamp tier-${achievement.tier.toLowerCase()}`}
                             >
                                 {achievement.tier}
                             </span>
                             <span className="text-[8px] font-['Press_Start_2P'] text-white/60">UNLOCKED!</span>
                         </div>
 
-                        <h3
-                            className="text-sm font-['Press_Start_2P'] mb-1"
-                            style={{ color: tierStyle.text }}
-                        >
+                        <h3 className={`text-sm font-['Press_Start_2P'] mb-1 tier-text-${achievement.tier.toLowerCase()}`}>
                             {achievement.name}
                         </h3>
 

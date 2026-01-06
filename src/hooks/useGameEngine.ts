@@ -5,13 +5,13 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GameState, ThrowStep, Ball, Pin, GameContextForCommentary, AssetsLoaded, Particle, BowlingFrame, LaneCondition, BallMaterial, GameStatistics, Spectator, Player, GameMode, CpuPersonality, PlayerProfile, UserInventory } from '../types';
+import { GameState, ThrowStep, Ball, Pin, GameContextForCommentary, AssetsLoaded, Particle, BowlingFrame, LaneCondition, BallMaterial, GameStatistics, Spectator, Player, GameMode, CpuPersonality, PlayerProfile, UserInventory, StageId, Stage, LifetimeStats } from '../types';
 import {
     CANVAS_WIDTH, CANVAS_HEIGHT, LANE_WIDTH, BALL_RADIUS, PIN_RADIUS,
     BALL_START_Y, HEAD_PIN_Y, PIN_COLLISION_RADIUS,
     PIN_DAMPING, PIN_PIN_COLLISION_RADIUS, IMPACT_FACTOR, PIN_ROTATION_DAMPING, MAX_TRAIL_LENGTH,
     BALL_WEIGHT_HEAVY, BALL_WEIGHT_LIGHT, LANE_LEFT_EDGE, LANE_RIGHT_EDGE, WINNINGS_PER_POINT,
-    MATERIAL_PROPS, LANE_PROPS, BALL_RETURN_WIDTH, MAX_SPIN, BASE_THROW_SPEED, XP_PER_PIN, XP_PER_STRIKE, XP_PER_SPARE, LEVELS, PIN_SPACING
+    MATERIAL_PROPS, LANE_PROPS, BALL_RETURN_WIDTH, MAX_SPIN, BASE_THROW_SPEED, XP_PER_PIN, XP_PER_STRIKE, XP_PER_SPARE, LEVELS, PIN_SPACING, WAGER_TARGET_SCORE
 } from '../constants';
 import { calculateBowlingScore, isGameOver } from '../utils/bowlingUtils';
 import { saveProgress, loadProgress } from '../utils/storageUtils';
@@ -30,13 +30,21 @@ type UseGameEngineProps = {
 };
 
 import { CelebrationType } from '../components/CelebrationOverlay';
+import { ACHIEVEMENT_POPUP_DURATION } from '../constants';
+import { ACHIEVEMENTS, DAILY_CHALLENGES, Achievement } from '../data/progression';
 
 // ... (existing imports)
 
+import { STAGES } from '../data/stages';
+
 export function useGameEngine({ assets }: UseGameEngineProps) {
     const [currentGameState, setCurrentGameState] = useState<GameState>('SPLASH');
+    const [currentStage, setCurrentStage] = useState<StageId>(STAGES[0].id);
     const [celebration, setCelebration] = useState<CelebrationType>(null);
     const [throwStep, setThrowStep] = useState<ThrowStep>('POSITION');
+    const [wager, setWager] = useState<number>(0);
+    const [lastWagerResult, setLastWagerResult] = useState<{ won: boolean, amount: number } | null>(null);
+    const [lastAchievement, setLastAchievement] = useState<Achievement | null>(null);
 
     const [isCountingDown, setIsCountingDown] = useState(false);
 
@@ -176,7 +184,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             assets.clapSoundRef.current?.play().catch(() => { });
             setImpactEffectText(event === 'strike' ? 'STRIKE!' : 'SPARE!');
             setShowImpactEffect(true);
-            setTimeout(() => setShowImpactEffect(false), 2000);
+            setTimeout(() => setShowImpactEffect(false), 1000);
         } else if (event === 'gutter') {
             newSpecs.forEach(s => s.state = 'BOO');
             assets.awwSoundRef.current?.play().catch(() => { });
@@ -270,8 +278,9 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             const speedMod = BASE_THROW_SPEED + ((currentPlayer?.profile?.stats.strength || 1) * 0.2);
 
             const angleRad = ball.angle * (Math.PI / 180);
+            const stage = STAGES.find(s => s.id === currentStage) || STAGES[0];
             const speedX = Math.sin(angleRad) * speedMod;
-            const speedY = -Math.cos(angleRad) * speedMod * laneParams.friction;
+            const speedY = -Math.cos(angleRad) * speedMod * laneParams.friction * stage.friction;
 
             ball.y += speedY;
             ball.x += speedX;
@@ -279,7 +288,8 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             if (ball.y < 350) setIsZoomed(true);
 
             if (!ball.inGutter) {
-                const hookForce = ball.spin * matParams.hookPotential * laneParams.hookModifier * 0.15;
+                const stage = STAGES.find(s => s.id === currentStage) || STAGES[0];
+                const hookForce = ball.spin * matParams.hookPotential * laneParams.hookModifier * stage.hookMult * 0.15;
                 ball.angle += hookForce;
 
                 if (ball.x < LANE_LEFT_EDGE + BALL_RADIUS / 2 || ball.x > LANE_RIGHT_EDGE - BALL_RADIUS / 2) {
@@ -562,6 +572,12 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             xpGain = Math.floor(xpGain * streakMultiplier);
             moneyGain = Math.floor(moneyGain * streakMultiplier);
 
+            // Stage Bonus
+            const stage = STAGES.find(s => s.id === currentStage) || STAGES[0];
+            const stageMult = 1.0 + (stage.unlockLevel * 0.1); // Higher stages = more rewards
+            xpGain = Math.floor(xpGain * stageMult);
+            moneyGain = Math.floor(moneyGain * stageMult);
+
             // Crowd Control stat bonus (+5% per point)
             const crowdBonus = 1 + ((p1.profile.stats?.crowdControl || 0) * 0.05);
             xpGain = Math.floor(xpGain * crowdBonus);
@@ -571,23 +587,76 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             p1.profile = { ...p1.profile, xp: (p1.profile.xp || 0) + xpGain };
             p1.inventory = { ...p1.inventory, money: (p1.inventory.money || 0) + moneyGain };
 
-            // Update Lifetime Stats
-            const lifetimeStats = p1.inventory.lifetimeStats || {
-                totalStrikes: 0, totalSpares: 0, totalPinsKnocked: 0,
-                gamesPlayed: 0, highScore: 0, bestStreak: 0, perfectGames: 0
-            };
-            lifetimeStats.totalPinsKnocked += knockedPins;
-            if (eventType === 'strike') lifetimeStats.totalStrikes++;
-            if (eventType === 'spare') lifetimeStats.totalSpares++;
-            if (streakCount > lifetimeStats.bestStreak) lifetimeStats.bestStreak = streakCount;
-            p1.inventory.lifetimeStats = lifetimeStats;
+            // --- Progression Logic ---
+            const today = new Date().toISOString().split('T')[0];
+            const inv = p1.inventory;
 
-            // CRITICAL FIX: Sync the updated profile into the inventory before saving/checking level up
-            // The Player object duplicates profile in both 'p1.profile' and 'p1.inventory.profile'
+            // 1. Lifetime Stats initialization & update
+            if (!inv.lifetimeStats) {
+                inv.lifetimeStats = { totalStrikes: 0, totalSpares: 0, totalPinsKnocked: 0, gamesPlayed: 0, highScore: 0, bestStreak: 0, perfectGames: 0 };
+            }
+            const lStats = inv.lifetimeStats;
+            lStats.totalPinsKnocked += knockedPins;
+            if (eventType === 'strike') lStats.totalStrikes++;
+            if (eventType === 'spare') lStats.totalSpares++;
+            if (p1.consecutiveStrikes > lStats.bestStreak) lStats.bestStreak = p1.consecutiveStrikes;
+
+            // 2. Daily Progress initialization & update
+            if (!inv.dailyProgress || inv.dailyProgress.date !== today) {
+                inv.dailyProgress = {
+                    date: today,
+                    strikesToday: 0,
+                    sparesToday: 0,
+                    pinsToday: 0,
+                    gamesToday: 0,
+                    highScoreToday: 0,
+                    completedChallenges: []
+                };
+            }
+            const daily = inv.dailyProgress;
+            daily.pinsToday += knockedPins;
+            if (eventType === 'strike') daily.strikesToday++;
+            if (eventType === 'spare') daily.sparesToday++;
+
+            // Check Daily Challenges completion
+            DAILY_CHALLENGES.forEach(challenge => {
+                if (daily.completedChallenges.includes(challenge.id)) return;
+                let currentProg = 0;
+                if (challenge.type === 'STRIKES') currentProg = daily.strikesToday;
+                else if (challenge.type === 'SPARES') currentProg = daily.sparesToday;
+                else if (challenge.type === 'PINS') currentProg = daily.pinsToday;
+
+                if (currentProg >= challenge.goal) {
+                    daily.completedChallenges.push(challenge.id);
+                    inv.money += challenge.moneyReward;
+                    p1.profile!.xp += challenge.xpReward;
+                    setMessage(`🏆 CHALLENGE: ${challenge.name} 🏆`);
+                }
+            });
+
+            // 3. Achievement Check
+            if (!inv.unlockedAchievements) inv.unlockedAchievements = [];
+            ACHIEVEMENTS.forEach(ach => {
+                if (inv.unlockedAchievements!.includes(ach.id)) return;
+                let currentProg = 0;
+                if (ach.type === 'STRIKES') currentProg = lStats.totalStrikes;
+                else if (ach.type === 'SPARES') currentProg = lStats.totalSpares;
+                else if (ach.type === 'TOTAL_PINS') currentProg = lStats.totalPinsKnocked;
+                else if (ach.type === 'STREAK') currentProg = lStats.bestStreak;
+                else if (ach.type === 'LEVEL') currentProg = p1.profile!.level;
+
+                if (currentProg >= ach.requirement && ach.type !== 'GAMES_PLAYED' && ach.type !== 'HIGH_SCORE') {
+                    inv.unlockedAchievements!.push(ach.id);
+                    inv.money += ach.moneyReward;
+                    p1.profile!.xp += ach.xpReward;
+                    setLastAchievement(ach);
+                }
+            });
+
             p1.inventory.profile = { ...p1.profile };
 
             // Particle effects
-            if (eventType === 'strike') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 80 + (streakCount * 10), '#ffd32a');
+            if (eventType === 'strike') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 80 + (p1.consecutiveStrikes * 10), '#ffd32a');
             else if (eventType === 'spare') spawnImpactParticles(CANVAS_WIDTH / 2, HEAD_PIN_Y, 40, '#0fbcf9');
 
             // Check Level Up
@@ -596,7 +665,6 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             if (p1.profile.xp >= nextXp) {
                 p1.profile.level++;
                 p1.profile.statPoints += 2;
-                // Update the inventory copy again after level up modification
                 p1.inventory.profile = { ...p1.profile };
                 setShowLevelUp(true);
             }
@@ -622,7 +690,80 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         assets.ballReturnSoundRef.current?.play().catch(() => { });
 
         setTimeout(() => {
-            if (updatedPlayers.every(p => isGameOver(p.frames))) {
+            if (updatedPlayers.every(player => isGameOver(player.frames))) {
+                const mainPlayer = updatedPlayers.find(pl => pl.id === 1);
+                if (mainPlayer && mainPlayer.profile && wager > 0) {
+                    const targetScore = WAGER_TARGET_SCORE;
+                    const won = mainPlayer.score >= targetScore;
+                    if (won) {
+                        mainPlayer.inventory.money += wager * 2;
+                        mainPlayer.profile.xp += 100;
+                        setMessage("🔥 WAGER WON! 🔥");
+                        setCelebration('WAGER_WIN');
+                    } else {
+                        setMessage("💸 WAGER LOST... 💸");
+                        setCelebration('WAGER_LOSS');
+                    }
+                    setLastWagerResult({ won, amount: wager });
+                }
+
+                // Final Game Over Progression Check
+                if (mainPlayer && mainPlayer.profile && mainPlayer.inventory) {
+                    const inv = mainPlayer.inventory;
+                    const today = new Date().toISOString().split('T')[0];
+
+                    if (!inv.lifetimeStats) {
+                        inv.lifetimeStats = { totalStrikes: 0, totalSpares: 0, totalPinsKnocked: 0, gamesPlayed: 0, highScore: 0, bestStreak: 0, perfectGames: 0 };
+                    }
+                    if (!inv.dailyProgress || inv.dailyProgress.date !== today) {
+                        inv.dailyProgress = { date: today, strikesToday: 0, sparesToday: 0, pinsToday: 0, gamesToday: 0, highScoreToday: 0, completedChallenges: [] };
+                    }
+                    if (!inv.unlockedAchievements) {
+                        inv.unlockedAchievements = [];
+                    }
+
+                    const stats = inv.lifetimeStats;
+                    const daily = inv.dailyProgress;
+
+                    stats.gamesPlayed++;
+                    daily.gamesToday++;
+                    if (mainPlayer.score > stats.highScore) stats.highScore = mainPlayer.score;
+                    if (mainPlayer.score > daily.highScoreToday) daily.highScoreToday = mainPlayer.score;
+
+                    // Daily Challenges for score/games
+                    DAILY_CHALLENGES.forEach(challenge => {
+                        if (daily.completedChallenges.includes(challenge.id)) return;
+                        let currentProg = 0;
+                        if (challenge.type === 'GAMES') currentProg = daily.gamesToday;
+                        else if (challenge.type === 'SCORE') currentProg = daily.highScoreToday;
+
+                        if (currentProg >= challenge.goal) {
+                            daily.completedChallenges.push(challenge.id);
+                            inv.money += challenge.moneyReward;
+                            mainPlayer.profile!.xp += challenge.xpReward;
+                        }
+                    });
+
+                    // Achievements for score/games
+                    ACHIEVEMENTS.forEach(ach => {
+                        if (inv.unlockedAchievements!.includes(ach.id)) return;
+                        let currentProg = 0;
+                        if (ach.type === 'GAMES_PLAYED') currentProg = stats.gamesPlayed;
+                        else if (ach.type === 'HIGH_SCORE') currentProg = stats.highScore;
+
+                        if (currentProg >= ach.requirement) {
+                            inv.unlockedAchievements!.push(ach.id);
+                            inv.money += ach.moneyReward;
+                            mainPlayer.profile!.xp += ach.xpReward;
+                            setLastAchievement(ach);
+                            assets.cheerSoundRef.current?.play().catch(() => { });
+                        }
+                    });
+
+                    saveProgress(inv);
+                }
+
+                setWager(0);
                 setCurrentGameState('GAME_OVER');
                 triggerEvent('gameOver', { totalScore });
             } else {
@@ -643,7 +784,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             }
             spectatorsRef.current.forEach(s => s.state = 'IDLE');
             setSpectators([...spectatorsRef.current]);
-        }, 2500);
+        }, 1500);
     };
 
     const determinePinReset = (currentRolls: number[]): boolean => {
@@ -703,8 +844,22 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
     const startGame = (mode: GameMode, cpu?: CpuPersonality) => {
         initPlayers(mode, cpu);
+
+        // Subtract wager if applicable
+        if (wager > 0) {
+            setPlayers(prev => {
+                const next = [...prev];
+                if (next[0] && next[0].id === 1) {
+                    next[0].inventory.money -= wager;
+                    saveProgress(next[0].inventory);
+                }
+                return next;
+            });
+        }
+
         resetPins();
         resetBall();
+        setLastWagerResult(null);
         setCurrentGameState(mode === 'SOLO' ? 'TUTORIAL' : 'READY_TO_BOWL');
         setTutorialStep(0);
         triggerEvent('gameStart');
@@ -751,6 +906,10 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         tutorialStep, advanceTutorial: () => setTutorialStep(prev => prev + 1), endTutorial: () => { setTutorialStep(-1); setCurrentGameState('READY_TO_BOWL'); },
         screenShake,
         canvasRef,
-        celebration, setCelebration
+        celebration, setCelebration,
+        currentStage, setCurrentStage,
+        wager, setWager,
+        lastWagerResult,
+        lastAchievement, setLastAchievement
     };
 }

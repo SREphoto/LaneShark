@@ -23,6 +23,26 @@ const XPGainPopup: React.FC<XPGainPopupProps> = ({
     isVisible
 }) => {
     const [show, setShow] = useState(false);
+    const streakRef = React.useRef<HTMLDivElement>(null);
+    const streakTextRef = React.useRef<HTMLSpanElement>(null);
+    const moneyRef = React.useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (streakRef.current && streakColor) {
+            streakRef.current.style.backgroundColor = `${streakColor}30`;
+            streakRef.current.style.borderColor = streakColor;
+            streakRef.current.style.boxShadow = `0 0 30px ${streakColor}`;
+        }
+        if (streakTextRef.current && streakColor) {
+            streakTextRef.current.style.color = streakColor;
+        }
+    }, [show, streakColor]);
+
+    useEffect(() => {
+        if (moneyRef.current && moneyGained > 0) {
+            moneyRef.current.style.animationDelay = '0.1s';
+        }
+    }, [show, moneyGained]);
 
     useEffect(() => {
         if (isVisible && (xpGained > 0 || moneyGained > 0)) {
@@ -39,16 +59,12 @@ const XPGainPopup: React.FC<XPGainPopupProps> = ({
             {/* Streak Indicator */}
             {streakName && (
                 <div
+                    ref={streakRef}
                     className="px-6 py-3 rounded-xl border-2 animate-pulse shadow-2xl"
-                    style={{
-                        backgroundColor: `${streakColor}30`,
-                        borderColor: streakColor,
-                        boxShadow: `0 0 30px ${streakColor}`
-                    }}
                 >
                     <span
+                        ref={streakTextRef}
                         className="text-xl font-['Press_Start_2P'] font-bold"
-                        style={{ color: streakColor }}
                     >
                         🔥 {streakName} 🔥
                     </span>
@@ -71,7 +87,10 @@ const XPGainPopup: React.FC<XPGainPopupProps> = ({
                 )}
 
                 {moneyGained > 0 && (
-                    <div className="px-4 py-2 bg-emerald-600/80 backdrop-blur-md rounded-lg border border-emerald-400/50 shadow-lg shadow-emerald-500/30 animate-bounce" style={{ animationDelay: '0.1s' }}>
+                    <div
+                        ref={moneyRef}
+                        className="px-4 py-2 bg-emerald-600/80 backdrop-blur-md rounded-lg border border-emerald-400/50 shadow-lg shadow-emerald-500/30 animate-bounce"
+                    >
                         <span className="text-lg font-['Press_Start_2P'] text-emerald-100">
                             +${moneyGained}
                         </span>

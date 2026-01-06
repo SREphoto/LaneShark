@@ -22,7 +22,7 @@ interface ThrowSequenceProps {
 }
 
 const ThrowSequence: React.FC<ThrowSequenceProps> = ({
-    step, onNext, userWeight, userSpin, inventory, 
+    step, onNext, userWeight, userSpin, inventory,
     onWeightChange, onSpinChange, onPositionMove, onAimMove,
     ballX, ballAngle
 }) => {
@@ -92,7 +92,14 @@ const ThrowSequence: React.FC<ThrowSequenceProps> = ({
                     {step === 'SPIN' && (
                         <div className="flex flex-col items-center">
                             <div className="text-white text-[8px] mb-4">HOOK: {userSpin > 0 ? `+${userSpin.toFixed(2)}` : userSpin.toFixed(2)}</div>
-                            <input type="range" min="-0.5" max="0.5" step="0.05" value={userSpin} onChange={(e) => onSpinChange(parseFloat(e.target.value))} className="w-full accent-blue-500 mb-4" />
+                            <input
+                                type="range" min="-0.5" max="0.5" step="0.05"
+                                value={userSpin}
+                                onChange={(e) => onSpinChange(parseFloat(e.target.value))}
+                                className="w-full accent-blue-500 mb-4"
+                                title="Adjust Ball Spin"
+                                aria-label="Ball Spin"
+                            />
                             <div className="flex justify-between w-full text-[6px] text-gray-500">
                                 <span>LEFT HOOK</span><span>STRAIGHT</span><span>RIGHT HOOK</span>
                             </div>
@@ -102,7 +109,14 @@ const ThrowSequence: React.FC<ThrowSequenceProps> = ({
                     {step === 'POSITION' && (
                         <div className="flex flex-col items-center">
                             <div className="text-white text-[8px] mb-5">DRAG TO SHIFT</div>
-                            <input type="range" min="80" max="320" value={ballX} onChange={(e) => onPositionMove(parseFloat(e.target.value))} className="w-full accent-green-500" />
+                            <input
+                                type="range" min="80" max="320"
+                                value={ballX}
+                                onChange={(e) => onPositionMove(parseFloat(e.target.value))}
+                                className="w-full accent-green-500"
+                                title="Adjust Ball Position"
+                                aria-label="Ball Position"
+                            />
                             <div className="text-[6px] text-gray-500 mt-2">CENTER: 200</div>
                         </div>
                     )}
@@ -119,7 +133,7 @@ const ThrowSequence: React.FC<ThrowSequenceProps> = ({
                     {step === 'POWER' && (
                         <div className="flex flex-col items-center">
                             <div className="w-full h-6 bg-gray-800 border-2 border-white relative overflow-hidden mb-3">
-                                 <div className="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-600 animate-pulse shadow-[0_0_10px_#f00]" style={{ width: '100%' }}></div>
+                                <div className="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-600 animate-pulse shadow-[0_0_10px_#f00] w-full"></div>
                             </div>
                             <div className="text-[8px] text-red-400 animate-pulse font-bold">MAX VELOCITY!</div>
                         </div>

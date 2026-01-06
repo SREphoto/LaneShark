@@ -25,27 +25,40 @@ const CyberButton: React.FC<CyberButtonProps> = ({
     const baseStyles = "relative inline-flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 font-['Press_Start_2P'] uppercase active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group";
 
     const sizeStyles = {
-        sm: "px-3 py-1.5 text-[8px] rounded-lg",
-        md: "px-5 py-2.5 text-[10px] rounded-xl",
-        lg: "px-8 py-4 text-sm rounded-2xl"
+        sm: "px-3 py-1.5 text-[8px] border-2",
+        md: "px-5 py-2.5 text-[10px] border-4",
+        lg: "px-8 py-4 text-sm border-4"
     };
 
     const variantStyles = {
-        primary: "bg-blue-600/20 border border-blue-500/50 text-blue-200 hover:bg-blue-600/40 hover:border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]",
-        secondary: "bg-purple-600/20 border border-purple-500/50 text-purple-200 hover:bg-purple-600/40 hover:border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]",
-        success: "bg-emerald-600/20 border border-emerald-500/50 text-emerald-200 hover:bg-emerald-600/40 hover:border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]",
-        danger: "bg-red-600/20 border border-red-500/50 text-red-200 hover:bg-red-600/40 hover:border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)]",
-        gold: "bg-yellow-600/20 border border-yellow-500/50 text-yellow-200 hover:bg-yellow-600/40 hover:border-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.3)]",
-        glass: "bg-white/5 backdrop-blur-md border border-white/20 text-white hover:bg-white/10 hover:border-white/30"
+        primary: "bg-blue-900 border-blue-400 text-white shadow-[4px_4px_0_#000]",
+        secondary: "bg-purple-900 border-purple-400 text-white shadow-[4px_4px_0_#000]",
+        success: "bg-emerald-900 border-emerald-400 text-white shadow-[4px_4px_0_#000]",
+        danger: "bg-red-900 border-red-400 text-white shadow-[4px_4px_0_#000]",
+        gold: "bg-yellow-900 border-yellow-400 text-white shadow-[4px_4px_0_#000]",
+        glass: "bg-gray-900 border-gray-400 text-white shadow-[4px_4px_0_#000]"
     };
+
+    const buttonRef = React.useRef<HTMLButtonElement>(null);
+
+    React.useEffect(() => {
+        if (buttonRef.current && glowColor) {
+            buttonRef.current.style.setProperty('--glow-color', `${glowColor}40`);
+            buttonRef.current.style.setProperty('--border-color', `${glowColor}80`);
+            buttonRef.current.style.boxShadow = '0 0 20px var(--glow-color)';
+            buttonRef.current.style.borderColor = 'var(--border-color)';
+        } else if (buttonRef.current) {
+            buttonRef.current.style.removeProperty('--glow-color');
+            buttonRef.current.style.removeProperty('--border-color');
+            buttonRef.current.style.boxShadow = '';
+            buttonRef.current.style.borderColor = '';
+        }
+    }, [glowColor, variant]);
 
     return (
         <button
+            ref={buttonRef}
             className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
-            style={{
-                boxShadow: glowColor ? `0 0 20px ${glowColor}40` : undefined,
-                borderColor: glowColor ? `${glowColor}80` : undefined
-            }}
             {...props}
         >
             {/* Scanline Effect */}

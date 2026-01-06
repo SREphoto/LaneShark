@@ -25,6 +25,14 @@ const ModernScoreboard: React.FC<ModernScoreboardProps> = ({
     xpProgress,
     level
 }) => {
+    const xpBarRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        if (xpBarRef.current) {
+            xpBarRef.current.style.width = `${xpProgress}%`;
+        }
+    }, [xpProgress]);
+
     return (
         <div className="flex flex-col gap-4 w-full max-w-4xl animate-slide-in-down pointer-events-auto">
             {/* Top Bar: Player Info & XP */}
@@ -43,8 +51,8 @@ const ModernScoreboard: React.FC<ModernScoreboardProps> = ({
                         <div className="flex items-center gap-2 mt-1">
                             <div className="h-1.5 w-32 bg-black/40 rounded-full overflow-hidden border border-white/5">
                                 <div
-                                    className="h-full bg-gradient-to-r from-purple-500 to-blue-400 shadow-[0_0_8px_rgba(168,85,247,0.6)] transition-all duration-1000"
-                                    style={{ width: `${xpProgress}%` }}
+                                    ref={xpBarRef}
+                                    className="progress-bar-fill bg-gradient-to-r from-purple-500 to-blue-400 shadow-[0_0_8px_rgba(168,85,247,0.6)]"
                                 />
                             </div>
                             <span className="text-[6px] font-['Press_Start_2P'] text-gray-400">XP</span>

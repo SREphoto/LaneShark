@@ -34,6 +34,12 @@ const LevelUpModal: React.FC<LevelUpModalProps> = ({ profile, onSave }) => {
     const [stats, setStats] = useState<PlayerStats>({ ...profile.stats });
     const [points, setPoints] = useState(profile.statPoints);
 
+    // Sync state if profile changes (e.g. nested level ups or sync delay)
+    React.useEffect(() => {
+        setStats({ ...profile.stats });
+        setPoints(profile.statPoints);
+    }, [profile.level, profile.statPoints]);
+
     const handleIncrement = (statKey: keyof PlayerStats) => {
         if (points > 0) {
             setStats(prev => ({ ...prev, [statKey]: prev[statKey] + 1 }));

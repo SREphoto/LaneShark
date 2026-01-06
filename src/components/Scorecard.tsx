@@ -42,53 +42,45 @@ const Scorecard: React.FC<ScorecardProps> = ({ frames }) => {
     };
 
     return (
-        <div className="fixed left-0 top-1/2 -translate-y-1/2 h-[90vh] w-20 z-40 animate-slide-in-left flex flex-col pointer-events-none">
-            <div className="flex-1 flex flex-col bg-black/80 backdrop-blur-xl border-r border-purple-500/30 shadow-2xl pointer-events-auto overflow-y-auto overflow-x-hidden custom-shop-scrollbar rounded-r-2xl">
-                {/* Vertical Header - More Premium */}
-                <div className="w-full py-6 border-b border-white/10 bg-gradient-to-b from-purple-900/40 to-black/80 flex items-center justify-center">
-                    <div className="rotate-90 origin-center whitespace-nowrap text-[10px] font-['Press_Start_2P'] text-purple-400 tracking-widest">SCORECARD</div>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/80" />
+
+            <div className="relative w-full max-w-md bg-black border-4 border-white shadow-[12px_12px_0_rgba(0,0,0,0.5)] overflow-hidden flex flex-col max-h-[90vh]">
+                {/* Header */}
+                <div className="bg-purple-900 p-4 border-b-4 border-white flex justify-between items-center">
+                    <h2 className="text-sm font-['Press_Start_2P'] text-white">SCORECARD</h2>
+                    <span className="text-[10px] font-['Press_Start_2P'] text-yellow-400">TOTAL: {frames[frames.length - 1]?.cumulativeScore || 0}</span>
                 </div>
 
-                {/* Frames 1-9 Vertical */}
-                {frames.slice(0, 9).map((f) => (
-                    <div key={f.frameNumber} className="flex-none h-20 w-full border-b border-white/10 flex flex-col group hover:bg-white/10 transition-colors">
-                        <div className="h-5 border-b border-white/5 flex items-center justify-center bg-white/5">
-                            <span className="text-[7px] font-['Press_Start_2P'] text-gray-400 group-hover:text-purple-300">FRAME {f.frameNumber}</span>
-                        </div>
-                        <div className="flex flex-1">
-                            <div className="w-1/2 border-r border-white/10 flex items-center justify-center text-[10px] font-['Press_Start_2P'] text-white">
-                                {f.isStrike ? '' : renderRoll(f, 0)}
+                <div className="flex-1 overflow-y-auto custom-shop-scrollbar p-4 space-y-2">
+                    {/* Frames 1-10 Vertical */}
+                    {Array.from({ length: 10 }).map((_, i) => {
+                        const f = frames[i] || { frameNumber: i + 1, rolls: [], isStrike: false, isSpare: false, cumulativeScore: null };
+                        return (
+                            <div key={i} className={`border-2 ${f.frameNumber === 10 ? 'border-yellow-500' : 'border-white/20'} bg-gray-950 p-3 flex items-center justify-between shadow-[4px_4px_0_rgba(0,0,0,0.5)]`}>
+                                <div className="flex items-center gap-6">
+                                    <span className={`text-[10px] font-['Press_Start_2P'] ${f.frameNumber === 10 ? 'text-yellow-500' : 'text-gray-500'}`}>FRM {f.frameNumber}</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-10 h-10 border-2 border-white/10 flex items-center justify-center text-xs text-white font-['Press_Start_2P']">
+                                            {f.isStrike ? 'X' : renderRoll(f as BowlingFrame, 0)}
+                                        </div>
+                                        <div className="w-10 h-10 border-2 border-white/10 flex items-center justify-center text-xs text-yellow-400 font-['Press_Start_2P'] bg-white/5">
+                                            {f.isStrike ? '-' : renderRoll(f as BowlingFrame, 1)}
+                                        </div>
+                                        {f.frameNumber === 10 && (
+                                            <div className="w-10 h-10 border-2 border-white/10 flex items-center justify-center text-xs text-white font-['Press_Start_2P']">
+                                                {renderRoll(f as BowlingFrame, 2)}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="text-sm font-['Press_Start_2P'] text-emerald-400">
+                                    {f.cumulativeScore !== null ? f.cumulativeScore : '-'}
+                                </div>
                             </div>
-                            <div className="w-1/2 flex items-center justify-center bg-white/5 text-[10px] font-['Press_Start_2P'] text-yellow-400">
-                                {f.isStrike ? 'X' : renderRoll(f, 1)}
-                            </div>
-                        </div>
-                        <div className="h-6 flex items-center justify-center bg-black/40">
-                            <span className={`text-[9px] font-['Press_Start_2P'] ${f.cumulativeScore !== null ? 'gold-text' : 'text-transparent'}`}>
-                                {f.cumulativeScore || ''}
-                            </span>
-                        </div>
-                    </div>
-                ))}
-
-                {/* Frame 10 Vertical */}
-                {frames[9] && (
-                    <div className="flex-none h-28 w-full flex flex-col bg-purple-950/30 group hover:bg-purple-900/40 transition-colors">
-                        <div className="h-5 border-b border-white/10 flex items-center justify-center bg-purple-600/40">
-                            <span className="text-[7px] font-['Press_Start_2P'] text-white">FRAME 10</span>
-                        </div>
-                        <div className="flex h-8">
-                            <div className="w-1/3 border-r border-white/10 flex items-center justify-center text-[8px] font-['Press_Start_2P'] text-white">{renderRoll(frames[9], 0)}</div>
-                            <div className="w-1/3 border-r border-white/10 flex items-center justify-center bg-white/5 text-[8px] font-['Press_Start_2P'] text-white">{renderRoll(frames[9], 1)}</div>
-                            <div className="w-1/3 flex items-center justify-center text-[8px] font-['Press_Start_2P'] text-yellow-400">{renderRoll(frames[9], 2)}</div>
-                        </div>
-                        <div className="flex-1 flex items-center justify-center bg-black/60">
-                            <span className={`text-[11px] font-['Press_Start_2P'] ${frames[9].cumulativeScore !== null ? 'gradient-text' : 'text-transparent'}`}>
-                                {frames[9].cumulativeScore || ''}
-                            </span>
-                        </div>
-                    </div>
-                )}
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

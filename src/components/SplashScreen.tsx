@@ -16,30 +16,37 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
 
     const [showCredits, setShowCredits] = useState(false);
     const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+    const loaderRef = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (showCredits) return; // Pause timer if credits are open
+        if (loaderRef.current) {
+            loaderRef.current.style.width = stage >= 1 ? '100%' : '0%';
+        }
+    }, [stage]);
 
-        // Stage sequence
+    useEffect(() => {
+        if (showCredits) return;
+
+        // Sequence
         const t1 = setTimeout(() => {
-            setStage(1);
-            playSound();
-        }, 500);
+            if (stage === 0) {
+                setStage(1);
+                playSound();
+            }
+        }, 1500);
 
-        const t2 = setTimeout(() => {
-            setStage(2);
-        }, 3000);
-
-        timeoutRef.current = setTimeout(() => {
-            onComplete();
-        }, 4000);
+        if (stage === 2) {
+            timeoutRef.current = setTimeout(() => {
+                setStage(3);
+                setTimeout(onComplete, 1000);
+            }, 500);
+        }
 
         return () => {
             clearTimeout(t1);
-            clearTimeout(t2);
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
-    }, [onComplete, playSound, showCredits]);
+    }, [onComplete, playSound, showCredits, stage]);
 
     const handleOpenCredits = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -59,7 +66,10 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
     };
 
     return (
-        <div className={`absolute inset-0 bg-[#0a0a0c] z-[100] flex flex-col items-center justify-center transition-opacity duration-1000 ${stage === 2 ? 'opacity-0' : 'opacity-100'}`}>
+        <div
+            className={`absolute inset-0 bg-[#000] z-[100] flex flex-col items-center justify-center transition-opacity duration-1000 ${stage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            onClick={() => { if (stage === 1) setStage(2); }}
+        >
             {/* Animated Logo Container */}
             <div className={`flex flex-col items-center transition-all duration-1000 transform ${stage >= 1 ? 'scale-110 opacity-100' : 'scale-75 opacity-0'}`}>
 
@@ -74,13 +84,20 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
                 </div>
 
                 {/* Subtitle */}
-                <div className="flex items-center gap-4 mt-8 animate-pulse">
+                <div className="flex items-center gap-4 mt-8">
                     <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/50" />
                     <div className="text-[10px] text-gray-400 font-['Press_Start_2P'] uppercase tracking-[0.3em]">
                         Bowling Evolution
                     </div>
                     <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/50" />
                 </div>
+
+                {stage === 1 && (
+                    <div className="mt-12 animate-pulse cursor-pointer">
+                        <span className="text-xl font-['Press_Start_2P'] text-yellow-500 animate-bounce block">PRESS START</span>
+                        <span className="text-[8px] font-['Press_Start_2P'] text-gray-500 text-center block mt-4">(CLICK TO BOWL)</span>
+                    </div>
+                )}
             </div>
 
             <div className="mt-6 flex flex-col items-center gap-1 animate-slide-up bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-white/5">
@@ -142,8 +159,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, playSound }) =>
             {/* Loading Indicator Overlay */}
             <div className="absolute bottom-10 left-10 right-10 h-1 loader-track">
                 <div
+                    ref={loaderRef}
                     className="loader-fill"
-                    style={{ width: stage >= 1 ? '100%' : '0%' }}
                 />
             </div>
         </div >

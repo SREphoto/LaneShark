@@ -369,13 +369,10 @@ canvas {
 
 .scoreboard {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: linear-gradient(to top, var(--bg-dark) 0%, transparent 100%);
-    -webkit-backdrop-filter: var(--blur-md);
-    backdrop-filter: var(--blur-md);
-    border-top: 3px solid var(--color-primary);
+    top: 32px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--color-primary);
     padding: 15px 20px;
     font-size: 1rem;
     color: var(--text-primary);
@@ -1468,8 +1465,8 @@ canvas {
 /* Redesign Utilities */
 .glass-morphism {
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
@@ -1566,7 +1563,7 @@ canvas {
     border-bottom: 2px solid var(--color-primary);
     display: flex;
     align-items: center;
-    z-index: 1000;
+    z-index: 100;
     font-family: 'Press Start 2P', cursive;
     overflow: hidden;
 }
@@ -1615,6 +1612,16 @@ canvas {
 }
 
 /* Retro UI Overrides */
+.header-retro {
+    position: absolute;
+    top: 32px;
+    left: 0;
+    width: 100%;
+    z-index: 200;
+    /* Higher than ticker */
+    pointer-events: auto;
+}
+
 .btn-retro {
     background: #222;
     border: 4px solid #fff;
@@ -1643,4 +1650,62 @@ canvas {
     background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
         linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
     background-size: 100% 3px, 3px 100%;
+}
+
+/* ========================================
+   DYNAMIC PROGRESS BARS
+   ======================================== */
+.progress-bar-container {
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   PARTICLE & CONFETTI SYSTEM
+   ======================================== */
+.particle {
+    position: absolute;
+    pointer-events: none;
+    --particle-left: 0%;
+    --particle-top: 0%;
+    --particle-color: #fff;
+    --particle-delay: 0s;
+    --particle-duration: 2s;
+    --particle-rotate: 0deg;
+
+    left: var(--particle-left);
+    top: var(--particle-top);
+    background-color: var(--particle-color);
+    animation-delay: var(--particle-delay);
+    animation-duration: var(--particle-duration);
+    transform: rotate(var(--particle-rotate));
+    filter: blur(1px);
+}
+
+.confetti-particle {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    animation: confetti-fall linear infinite;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
 }

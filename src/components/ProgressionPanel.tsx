@@ -54,6 +54,34 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
     const today = new Date().toISOString().split('T')[0];
     const isTodayProgress = dailyProgress?.date === today;
 
+    const milestoneBarRef = React.useRef<HTMLDivElement>(null);
+    const dailyRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+    const achRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+
+    React.useEffect(() => {
+        if (milestoneBarRef.current && nextMilestone) {
+            milestoneBarRef.current.style.width = `${Math.min(100, (currentXp / nextMilestone.xp) * 100)}%`;
+        }
+
+        DAILY_CHALLENGES.slice(0, 3).forEach(c => {
+            const el = dailyRefs.current.get(c.id);
+            if (el) {
+                const progress = isTodayProgress ? getDailyProgress(c, dailyProgress!) : 0;
+                el.style.width = `${Math.min(100, (progress / c.goal) * 100)}%`;
+            }
+        });
+
+        getNextAchievements().forEach(a => {
+            const el = achRefs.current.get(a.id);
+            if (el) {
+                const progress = getAchievementProgress(a);
+                const tierStyle = TIER_COLORS[a.tier];
+                el.style.width = `${progress}%`;
+                el.style.backgroundColor = tierStyle.border;
+            }
+        });
+    }, [currentXp, nextMilestone, dailyProgress, isTodayProgress, stats]);
+
     return (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-fade-in">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
@@ -107,8 +135,8 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                                 <div className="text-[9px] font-['Press_Start_2P'] text-gray-400">{nextMilestone.reward}</div>
                                 <div className="h-4 bg-black/40 rounded-full overflow-hidden border border-white/10">
                                     <div
-                                        className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-500"
-                                        style={{ width: `${Math.min(100, (currentXp / nextMilestone.xp) * 100)}%` }}
+                                        ref={milestoneBarRef}
+                                        className="progress-bar-fill bg-gradient-to-r from-emerald-600 to-emerald-400"
                                     />
                                 </div>
                                 <div className="flex justify-between text-[8px] font-['Press_Start_2P'] text-gray-500">
@@ -142,8 +170,8 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                                         <div className="text-[7px] font-['Press_Start_2P'] text-gray-500 mb-2">{challenge.description}</div>
                                         <div className="h-2 bg-black/40 rounded-full overflow-hidden">
                                             <div
-                                                className={`h-full transition-all ${isComplete ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                                                style={{ width: `${Math.min(100, (progress / challenge.goal) * 100)}%` }}
+                                                ref={el => el ? dailyRefs.current.set(challenge.id, el) : dailyRefs.current.delete(challenge.id)}
+                                                className={`progress-bar-fill ${isComplete ? 'bg-emerald-500' : 'bg-blue-500'}`}
                                             />
                                         </div>
                                         <div className="flex justify-between mt-1 text-[6px] font-['Press_Start_2P'] text-gray-600">
@@ -171,8 +199,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[9px] font-['Press_Start_2P'] text-white">{achievement.name}</span>
                                                     <span
-                                                        className="text-[6px] font-['Press_Start_2P'] px-1 rounded"
-                                                        style={{ backgroundColor: tierStyle.border, color: tierStyle.bg }}
+                                                        className={`tier-stamp tier-${achievement.tier.toLowerCase()}`}
                                                     >
                                                         {achievement.tier}
                                                     </span>
@@ -182,11 +209,8 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                                         </div>
                                         <div className="h-2 bg-black/40 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full transition-all"
-                                                style={{
-                                                    width: `${progress}%`,
-                                                    backgroundColor: tierStyle.border
-                                                }}
+                                                ref={el => el ? achRefs.current.set(achievement.id, el) : achRefs.current.delete(achievement.id)}
+                                                className="progress-bar-fill"
                                             />
                                         </div>
                                         <div className="flex justify-between mt-1 text-[6px] font-['Press_Start_2P'] text-gray-600">
@@ -213,11 +237,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                                     return (
                                         <div
                                             key={id}
-                                            className="p-2 rounded-lg border"
-                                            style={{
-                                                backgroundColor: `${tierStyle.bg}60`,
-                                                borderColor: tierStyle.border
-                                            }}
+                                            className={`p-2 rounded-lg border tier-bg-${ach.tier.toLowerCase()}`}
                                             title={`${ach.name}: ${ach.description}`}
                                         >
                                             <span className="text-lg">{ach.icon}</span>
@@ -229,7 +249,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ inventory, onClose 
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

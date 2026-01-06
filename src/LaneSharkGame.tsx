@@ -7,10 +7,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 import { useGameAssets } from './hooks/useGameAssets';
 import { useGameEngine } from './hooks/useGameEngine';
-import { TUTORIAL_STEPS } from './constants';
-import { GameMode, CpuPersonality, PlayerProfile, BallMaterial } from './types';
+import { TUTORIAL_STEPS, WAGER_TARGET_SCORE } from './constants';
+import { GameMode, CpuPersonality, PlayerProfile, BallMaterial, StageId } from './types';
 import { loadProgress, saveProgress } from './utils/storageUtils';
 import { SHOP_ITEMS } from './data/shopItems';
+import { STAGES } from './data/stages';
 
 import NewsTicker from './components/NewsTicker';
 import Scoreboard from './components/Scoreboard';
@@ -27,8 +28,10 @@ import ModeSelect from './components/ModeSelect';
 import PlayerCreator from './components/PlayerCreator';
 import LevelUpModal from './components/LevelUpModal';
 import ProgressionPanel from './components/ProgressionPanel';
+import AchievementPopup from './components/AchievementPopup';
 import CelebrationOverlay from './components/CelebrationOverlay';
 import CyberButton from './components/CyberButton';
+import StageSelect from './components/StageSelect';
 
 
 
@@ -37,6 +40,7 @@ import CyberButton from './components/CyberButton';
  */
 function LaneSharkGame() {
     const assets = useGameAssets();
+    const xpBarRef = React.useRef<HTMLDivElement>(null);
 
     // User Inventory State (Main Player)
     const [inventory, setInventory] = useState(loadProgress());
@@ -46,6 +50,8 @@ function LaneSharkGame() {
     const [showBallSettings, setShowBallSettings] = useState(false);
     const [showScorecard, setShowScorecard] = useState(false);
     const [showProgressionPanel, setShowProgressionPanel] = useState(false);
+    const [showStageSelect, setShowStageSelect] = useState(false);
+    const [pendingGameConfig, setPendingGameConfig] = useState<{ mode: GameMode, cpu?: CpuPersonality, wager?: number } | null>(null);
 
 
     const game = useGameEngine({
@@ -93,6 +99,12 @@ function LaneSharkGame() {
     };
 
     useEffect(() => {
+        if (xpBarRef.current) {
+            xpBarRef.current.style.width = `${game.xpProgress}%`;
+        }
+    }, [game.xpProgress]);
+
+    useEffect(() => {
         if (game.players.length > 0 && game.players[0].id === 1) {
             const engineInv = game.players[0].inventory;
             if (engineInv.money !== inventory.money || engineInv.profile?.xp !== inventory.profile?.xp) {
@@ -129,8 +141,20 @@ function LaneSharkGame() {
         saveProgress(newInv);
     };
 
-    const handleModeSelect = (mode: GameMode, cpu?: CpuPersonality) => {
-        game.startGame(mode, cpu);
+    const handleModeSelect = (mode: GameMode, cpu?: CpuPersonality, wager: number = 0) => {
+        setPendingGameConfig({ mode, cpu, wager });
+        setShowStageSelect(true);
+    };
+
+    const handleStageSelect = (stageId: StageId) => {
+        if (pendingGameConfig) {
+            game.setCurrentStage(stageId);
+            game.setWager(pendingGameConfig.wager || 0);
+
+            game.startGame(pendingGameConfig.mode, pendingGameConfig.cpu);
+            setShowStageSelect(false);
+            setPendingGameConfig(null);
+        }
     };
 
     const isBowlReady = game.currentGameState === 'READY_TO_BOWL';
@@ -181,15 +205,19 @@ function LaneSharkGame() {
                 <PlayerCreator onComplete={handlePlayerCreated} />
             )}
 
-            {game.showLevelUp && inventory.profile && (
-                <LevelUpModal profile={inventory.profile} onSave={handleLevelUpSave} />
+            {game.showLevelUp && game.players[0]?.profile && (
+                <LevelUpModal
+                    key={`levelup-${game.players[0].profile.level}`}
+                    profile={game.players[0].profile}
+                    onSave={handleLevelUpSave}
+                />
             )}
 
             {game.currentGameState === 'MENU' && (
-                <div className="animate-fade-in h-full">
+                <div className="animate-fade-in h-full flex flex-col pt-[32px]">
                     <NewsTicker />
                     {/* Header */}
-                    <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between px-8 z-50">
+                    <div className="header-retro h-20 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between px-8">
                         <div className="flex flex-col">
                             <h1 className="text-2xl font-['Press_Start_2P'] gradient-text tracking-tighter">LANESHARK</h1>
                             <span className="text-[8px] font-['Press_Start_2P'] text-gray-500 tracking-[0.2em] mt-1 ml-1">OFFICIAL CHAMPIONSHIP</span>
@@ -198,32 +226,30 @@ function LaneSharkGame() {
                         <div className="flex items-center gap-6">
                             <div className="flex flex-col items-end">
                                 <span className="text-[8px] font-['Press_Start_2P'] text-emerald-400 mb-1 leading-none">${inventory.money.toLocaleString()}</span>
-                                <div className="h-1 w-24 bg-white/10 rounded-full overflow-hidden mb-1 border border-white/5">
-                                    <div className="h-full bg-emerald-500 shadow-emerald-glow" style={{ width: '100%' }} />
-                                </div>
+                                <div
+                                    className="progress-bar-fill bg-emerald-500 shadow-emerald-glow w-full"
+                                />
                                 <div className="flex items-center gap-2">
                                     <span className="text-[6px] font-['Press_Start_2P'] text-yellow-400">LVL {inventory.profile?.level || 1}</span>
-                                    <div className="h-1 w-16 bg-white/10 rounded-full overflow-hidden border border-white/5" title={`XP: ${inventory.profile?.xp} / ${game.nextLevelXp}`}>
-                                        <div
-                                            className="h-full bg-yellow-400 shadow-gold-glow transition-all duration-1000"
-                                            style={{ width: `${game.xpProgress}%` }}
-                                        />
-                                    </div>
+                                    <div
+                                        ref={xpBarRef}
+                                        className="progress-bar-fill bg-yellow-400 shadow-gold-glow"
+                                    />
                                 </div>
                             </div>
 
                             <CyberButton
                                 variant="secondary"
                                 icon="📊"
-                                onClick={() => setShowProgressionPanel(true)}
+                                onClick={(e) => { e.stopPropagation(); setShowProgressionPanel(true); }}
                                 title="STATS & ACHIEVEMENTS"
                             />
 
                             <CyberButton
-                                variant="glass"
+                                variant="gold"
                                 label="SHOP"
                                 icon="🛒"
-                                onClick={() => setIsShopOpen(true)}
+                                onClick={(e) => { e.stopPropagation(); setIsShopOpen(true); }}
                                 title="PRO SHOP"
                             />
                         </div>
@@ -246,7 +272,16 @@ function LaneSharkGame() {
                         onClickBowler={() => handleModeSelect('SOLO')}
                         availableBalls={availableBalls}
                         onSelectBall={game.setUserMaterial}
+                        currentStage={game.currentStage}
                     />
+
+                    {showStageSelect && (
+                        <StageSelect
+                            currentLevel={inventory.profile?.level || 1}
+                            onSelect={handleStageSelect}
+                            onClose={() => setShowStageSelect(false)}
+                        />
+                    )}
 
                     {inventory.profile && (
                         <div className="absolute top-24 right-6 flex flex-col items-center z-50 animate-slide-in-right group">
@@ -279,7 +314,7 @@ function LaneSharkGame() {
                         </div>
                     )}
 
-                    <ModeSelect onSelectMode={handleModeSelect} />
+                    <ModeSelect onSelectMode={handleModeSelect} currentMoney={inventory.money} />
 
                     {isShopOpen && (
                         <Shop
@@ -302,13 +337,13 @@ function LaneSharkGame() {
             )}
 
             {game.currentGameState !== 'SPLASH' && game.currentGameState !== 'MENU' && game.currentGameState !== 'PLAYER_CREATOR' && (
-                <div className="h-full w-full relative overflow-hidden">
+                <div className="h-full w-full relative overflow-hidden flex flex-col pt-[32px]">
                     {/* Game HUD */}
                     {/* Responsive HUD Overlay */}
                     <div className="absolute inset-0 z-50 pointer-events-none flex flex-col justify-between">
 
                         {/* 1. Top Bar: Navigation, Title, Economy */}
-                        <div className="w-full bg-gradient-to-b from-black/90 via-black/40 to-transparent p-4 flex items-start justify-between pointer-events-auto">
+                        <div className="header-retro h-24 bg-gradient-to-b from-black/90 via-black/40 to-transparent p-4 flex items-start justify-between">
                             {/* Left: Exit */}
                             <button
                                 onClick={() => game.setCurrentGameState('MENU')}
@@ -356,6 +391,17 @@ function LaneSharkGame() {
                                     throwInFrame={currentPlayer?.rolls.length ? (currentPlayer.rolls.length % 2 === 0 ? 1 : 2) : 1}
                                 />
 
+                                {game.wager > 0 && (
+                                    <div className="mt-2 px-3 py-1 bg-yellow-900/40 border border-yellow-500/50 rounded-lg animate-pulse">
+                                        <div className="text-yellow-400 font-['Press_Start_2P'] text-[6px] tracking-widest text-right">
+                                            ACTIVE WAGER: ${game.wager}
+                                        </div>
+                                        <div className="text-white/60 font-['Press_Start_2P'] text-[5px] mt-1 text-right">
+                                            TARGET: {WAGER_TARGET_SCORE}+ PTS
+                                        </div>
+                                    </div>
+                                )}
+
                                 {currentPlayer && !currentPlayer.isCpu && (
                                     <div className="flex gap-3 mt-2 pointer-events-auto">
                                         <CyberButton
@@ -381,7 +427,6 @@ function LaneSharkGame() {
                             </div>
 
                             {/* 2. Bottom Area: Intentionally empty for bowler interaction and scorecard visibility */}
-                            <div className="pointer-events-none h-24 w-full" />
                         </div>
 
                         <GameCanvas
@@ -408,6 +453,7 @@ function LaneSharkGame() {
                             }}
                             availableBalls={availableBalls}
                             onSelectBall={game.setUserMaterial}
+                            currentStage={game.currentStage}
                         />
 
                         {isShopOpen && (
@@ -463,7 +509,9 @@ function LaneSharkGame() {
                                     gutters: game.players[0].rolls.filter(r => r === 0).length,
                                     openFrames: game.players[0].frames.filter(f => !f.isStrike && !f.isSpare && f.rolls.length === 2 && f.rolls[0] + f.rolls[1] < 10).length,
                                     totalPins: game.players[0].rolls.reduce((a, b) => a + b, 0),
-                                    accuracy: (game.players[0].rolls.filter(r => r > 0).length / Math.max(1, game.players[0].rolls.length)) * 100
+                                    accuracy: (game.players[0].rolls.filter(r => r > 0).length / Math.max(1, game.players[0].rolls.length)) * 100,
+                                    wagerAmount: game.lastWagerResult?.amount,
+                                    wagerWon: game.lastWagerResult?.won
                                 }}
                                 profile={game.players[0].profile}
                                 onClose={() => game.setCurrentGameState('MENU')}
@@ -478,10 +526,15 @@ function LaneSharkGame() {
 
                         <ImpactMessage message={game.impactEffectText} isVisible={game.showImpactEffect} />
 
-                        {/* Celebration Overlay */}
                         <CelebrationOverlay
                             type={game.celebration}
                             onComplete={() => game.setCelebration(null)}
+                        />
+
+                        {/* Achievement Notification */}
+                        <AchievementPopup
+                            achievement={game.lastAchievement}
+                            onDismiss={() => game.setLastAchievement(null)}
                         />
 
                         {/* Level Up Modal - REMOVED DUPLICATE (Already rendered at top level) */}

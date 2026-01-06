@@ -51,12 +51,14 @@ export const MAX_TRAIL_LENGTH = 45;
 // --- Economy ---
 export const WINNINGS_PER_POINT = 2;
 export const WINNINGS_STRIKE_BONUS = 50;
+export const WAGER_TARGET_SCORE = 150;
 
 // --- RPG ---
 export const XP_PER_PIN = 5;
 export const XP_PER_STRIKE = 50;
 export const XP_PER_SPARE = 25;
 export const LEVELS = [0, 500, 1500, 3000, 5000, 8000, 12000, 17000, 25000, 50000];
+export const ACHIEVEMENT_POPUP_DURATION = 4000;
 
 // --- Advanced Physics Props ---
 export const MATERIAL_PROPS = {

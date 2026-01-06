@@ -12,6 +12,21 @@ export type GameMode = 'SOLO' | 'TWO_PLAYER' | 'VS_CPU';
 
 export type LaneCondition = 'NORMAL' | 'DRY' | 'OILY';
 export type BallMaterial = 'PLASTIC' | 'URETHANE' | 'RESIN';
+export type StageId = 'CLASSIC' | 'RETRO_NEON' | 'NEO_TOKYO' | 'COSMIC_VOID';
+
+export interface Stage {
+    id: StageId;
+    name: string;
+    description: string;
+    unlockLevel: number;
+    friction: number;
+    hookMult: number;
+    colors: {
+        lane: string;
+        gutter: string;
+        bg: string[];
+    };
+}
 
 export interface CpuPersonality {
     id: string;
@@ -186,6 +201,8 @@ export interface GameStatistics {
     openFrames: number;
     totalPins: number;
     accuracy: number;
+    wagerAmount?: number;
+    wagerWon?: boolean;
 }
 
 export interface Spectator {

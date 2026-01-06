@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { GameStatistics, PlayerProfile } from '../types';
+import { WAGER_TARGET_SCORE } from '../constants';
 
 interface StatisticsScreenProps {
     stats: GameStatistics;
@@ -34,6 +35,20 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ stats, profile, onC
                             {stats.totalScore.toLocaleString()}
                         </span>
                     </div>
+
+                    {stats.wagerAmount !== undefined && stats.wagerAmount > 0 && (
+                        <div className={`border-4 p-4 flex justify-between items-center animate-pulse ${stats.wagerWon ? 'border-emerald-500 bg-emerald-950/20' : 'border-red-900 bg-red-950/20'}`}>
+                            <div className="flex flex-col">
+                                <span className={`text-[8px] font-['Press_Start_2P'] ${stats.wagerWon ? 'text-emerald-400' : 'text-red-500'}`}>
+                                    WAGER {stats.wagerWon ? 'WON' : 'LOST'}
+                                </span>
+                                <span className="text-[6px] font-['Press_Start_2P'] text-gray-500 mt-1">TARGET: {WAGER_TARGET_SCORE}</span>
+                            </div>
+                            <span className={`text-xl font-['Press_Start_2P'] ${stats.wagerWon ? 'text-emerald-400' : 'text-red-500'}`}>
+                                {stats.wagerWon ? `+$${stats.wagerAmount * 2}` : `-$${stats.wagerAmount}`}
+                            </span>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="border-4 border-gray-800 bg-gray-950 p-4 flex flex-col items-center gap-2">
