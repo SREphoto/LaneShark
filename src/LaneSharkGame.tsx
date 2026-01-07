@@ -373,6 +373,28 @@ function LaneSharkGame() {
                                 <h1 className="hidden md:block text-xs font-['Press_Start_2P'] gradient-text shadow-glow-effect mb-2">LANESHARK</h1>
 
                             </div>
+
+                            {/* Right Area: Control Buttons */}
+                            <div className="flex items-center gap-2 z-50 pointer-events-auto">
+                                <button
+                                    onClick={() => setShowScorecard(!showScorecard)}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-xl border backdrop-blur-md transition-all ${showScorecard ? 'bg-blue-600 border-blue-400 text-white' : 'bg-black/40 border-white/10 text-blue-400 hover:bg-black/60'}`}
+                                >
+                                    📋
+                                </button>
+                                <button
+                                    onClick={() => setIsShopOpen(true)}
+                                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-purple-900/40 to-black/40 text-purple-400 backdrop-blur-md transition-all hover:scale-105"
+                                >
+                                    🛒
+                                </button>
+                                <button
+                                    onClick={() => setShowBallSettings(!showBallSettings)}
+                                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-white/10 bg-black/40 text-gray-400 backdrop-blur-md transition-all hover:bg-black/60"
+                                >
+                                    ⚙️
+                                </button>
+                            </div>
                         </div>
 
                         {/* BOTTOM CONTROL BAR - Status Message Here to avoid blocking pins at top */}
