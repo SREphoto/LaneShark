@@ -32,6 +32,7 @@ interface GameCanvasProps {
     availableBalls?: BallMaterial[];
     onSelectBall?: (material: BallMaterial) => void;
     currentStage?: StageId;
+    onSwipeThrow?: (power: number, angle: number) => void; // Call with calculated power/angle
 }
 
 const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -40,7 +41,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     equippedItems = [], aimOscillation = 0, powerOscillation = 0.8,
     throwStep = 'POSITION', screenShake = 0, onClickBowler,
     availableBalls = ['PLASTIC', 'URETHANE', 'RESIN'], onSelectBall,
-    currentStage = 'CLASSIC'
+    currentStage = 'CLASSIC', onSwipeThrow
 }) => {
 
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -372,7 +373,58 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 ctx.restore();
             });
 
-            // Gameplay
+            // --- VISUAL ENHANCEMENTS: REFLECTIONS & SHADOWS ---
+            const drawShadow = (ctx: CanvasRenderingContext2D, x: number, y: number, r: number) => {
+                ctx.save();
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                ctx.translate(x, y);
+                ctx.scale(1, 0.4); // Flatten oval
+                ctx.beginPath();
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            };
+
+            const drawReflection = (ctx: CanvasRenderingContext2D, drawFn: () => void, x: number, y: number) => {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.scale(1, -1); // Flip vertically
+                ctx.translate(-x, -y);
+
+                // Reflection mask/opacity
+                ctx.globalAlpha = 0.15;
+                // Add a slight vertical offset for the reflection to appear "in" the floor
+                ctx.translate(0, 10);
+
+                drawFn();
+                ctx.restore();
+            };
+
+            // 1. Reflections Layer (Shiny Lane)
+            // Pins Reflections
+            pins.forEach(p => {
+                drawReflection(ctx, () => drawPin(ctx, p), p.x, p.y);
+            });
+            // Ball Reflection
+            if (gameState === 'ROLLING' || gameState === 'PIN_SETTLEMENT' || gameState === 'BALL_RETURN') {
+                drawReflection(ctx, () => {
+                    ctx.save(); ctx.translate(ball.x, ball.y); ctx.rotate(ball.angle * Math.PI / 180);
+                    // Simplify ball for reflection (no image, just color/shape) for perf & style
+                    ctx.fillStyle = ball.material === 'PLASTIC' ? '#3b82f6' : ball.material === 'URETHANE' ? '#be123c' : '#1e3a8a';
+                    ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI * 2); ctx.fill();
+                    ctx.restore();
+                }, ball.x, ball.y);
+            }
+
+            // 2. Shadows Layer
+            pins.forEach(p => {
+                if (!p.isDown) drawShadow(ctx, p.x, p.y + 4, 10);
+            });
+            if (gameState === 'ROLLING' || gameState === 'PIN_SETTLEMENT') {
+                drawShadow(ctx, ball.x, ball.y + 16, 14);
+            }
+
+            // 3. Gameplay Objects (Main Layer)
             pins.forEach(p => drawPin(ctx, p));
 
             if (trail.length > 2) {
@@ -396,7 +448,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
                 if (ballImage) ctx.drawImage(ballImage, -ball.radius, -ball.radius, ball.radius * 2, ball.radius * 2);
                 else {
-                    const ballColors = {
+                    const ballColors: Record<string, string> = {
                         PLASTIC: '#3b82f6',
                         URETHANE: '#be123c',
                         RESIN: '#1e3a8a'
@@ -413,6 +465,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             });
 
             if (gameState === 'THROW_SEQUENCE' || gameState === 'READY_TO_BOWL' || gameState === 'MENU') {
+                // Bowler Shadow
+                drawShadow(ctx, ball.x, ball.y + 40 + 5, 18);
                 drawBowler(ctx, ball.x, ball.y + 40, true, gameState, ball.angle);
             }
 
@@ -441,7 +495,63 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         return () => { if (gameLoopIdRef.current) cancelAnimationFrame(gameLoopIdRef.current); };
     }, [ball, pins, trail, particles, gameState, ballImage, spectators, laneCondition, aimOscillation, powerOscillation, throwStep, screenShake, WoodPattern, currentStage]);
 
-    return <canvas ref={canvasRef} className="game-canvas-element" onClick={handleCanvasClick} />;
+    // --- TOUCH CONTROLS (SWIPE TO BOWL) ---
+    const touchStartRef = useRef<{ x: number, y: number, time: number } | null>(null);
+
+    const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        if (gameState !== 'READY_TO_BOWL' && gameState !== 'THROW_SEQUENCE') return;
+
+        // Prevent default scrolling
+        // e.preventDefault(); // Note: React synthetic events might not support this directly here, usually done in CSS touch-action: none;
+
+        const touch = e.touches[0];
+        touchStartRef.current = {
+            x: touch.clientX,
+            y: touch.clientY,
+            time: Date.now()
+        };
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        if (!touchStartRef.current || (gameState !== 'READY_TO_BOWL' && gameState !== 'THROW_SEQUENCE')) return;
+
+        const touch = e.changedTouches[0];
+        const endTime = Date.now();
+        const start = touchStartRef.current;
+
+        const dx = touch.clientX - start.x;
+        const dy = touch.clientY - start.y;
+        const dt = endTime - start.time;
+
+        // Swipe must be upward (negative dy) and fast enough
+        if (dy < -50 && dt < 1000) {
+            // Calculate Power (Speed)
+            // Fast swipe (100ms) = High Power 1.5, Slow swipe (600ms+) = Low Power 0.5
+            const speedFactor = Math.min(1.5, Math.max(0.5, 600 / dt));
+
+            // Calculate Angle (Accuracy)
+            // dx of 0 = Straight (0deg). dx of +/- 100px = +/- 5deg
+            const maxAngle = 8; // Max degrees deflection
+            const screenWidth = window.innerWidth;
+            const angleBias = Math.max(-maxAngle, Math.min(maxAngle, (dx / (screenWidth / 3)) * maxAngle));
+
+            // Trigger Throw
+            if (onSwipeThrow) {
+                onSwipeThrow(speedFactor, angleBias);
+            }
+        }
+
+        touchStartRef.current = null;
+    };
+
+    return <canvas
+        ref={canvasRef}
+        className="game-canvas-element"
+        onClick={handleCanvasClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{ touchAction: 'none' }} // Crucial for preventing scroll
+    />;
 };
 
 export default GameCanvas;

@@ -1441,26 +1441,7 @@ canvas {
 }
 
 
-/* NEWS TICKER */
-@keyframes marquee {
-    0% {
-        transform: translateX(100%);
-    }
 
-    100% {
-        transform: translateX(-100%);
-    }
-}
-
-.animate-marquee {
-    display: inline-block;
-    white-space: nowrap;
-    animation: marquee 30s linear infinite;
-}
-
-.animate-marquee:hover {
-    animation-play-state: paused;
-}
 
 /* Redesign Utilities */
 .glass-morphism {
@@ -1549,67 +1530,7 @@ canvas {
     filter: drop-shadow(0 0 8px currentColor);
 }
 
-/* ========================================
-   📰 NEWS TICKER & RETRO UI
-   ======================================== */
 
-.news-ticker-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 32px;
-    background: #000;
-    border-bottom: 2px solid var(--color-primary);
-    display: flex;
-    align-items: center;
-    z-index: 100;
-    font-family: 'Press Start 2P', cursive;
-    overflow: hidden;
-}
-
-.news-ticker-label {
-    background: var(--color-primary);
-    color: #fff;
-    height: 100%;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    font-size: 10px;
-    z-index: 2;
-    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
-}
-
-.news-ticker-scroll {
-    flex: 1;
-    overflow: hidden;
-    white-space: nowrap;
-    position: relative;
-}
-
-.news-ticker-content {
-    display: inline-block;
-    padding-left: 100%;
-    animation: ticker 30s linear infinite;
-}
-
-.news-item {
-    padding: 0 40px;
-    font-size: 10px;
-    color: #fff;
-    text-shadow: 2px 2px 0 var(--color-primary);
-    letter-spacing: 1px;
-}
-
-@keyframes ticker {
-    0% {
-        transform: translateX(0);
-    }
-
-    100% {
-        transform: translateX(-50%);
-    }
-}
 
 /* Retro UI Overrides */
 .header-retro {

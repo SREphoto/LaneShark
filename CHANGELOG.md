@@ -1,5 +1,30 @@
 # LaneShark Change Log
 
+## [1.7.1] - 2026-01-06
+
+### Visuals
+
+- **Lane Reflections**: Added polished wood reflection effect.
+- **Dynamic Shadows**: Objects now cast shadows for depth.
+- **Impact Shake**: Screen shakes on strikes and strong hits.
+
+## [1.7.0] - 2026-01-06
+
+### Features
+
+- **Swipe-to-Bowl**: Added mobile-friendly touch controls. Flick to throw!
+- **Pro Physics**: Implemented "Skid-Snap" oil pattern logic for realistic ball hooking.
+- **UI Overhaul**: New vertical scoreboard sidebar and glassmorphism HUD.
+- **Reliability**: Added 'Watchdog' system to auto-recover from game glitches.
+
+## [1.6.2] - 2026-01-05
+
+### Fixes
+
+- **Splash Screens**: Fixed issue where overlays (Intro, Celebration, Achievements) would not automatically dismiss. Implemented stable callbacks to prevent timer resets.
+- **Cleanup**: Verified and finalized removal of NewsTicker component and styles.
+- **Documentation**: Updated README, added PRD, MVP, and Architecture docs.
+
 ## [1.6.1] - 2026-01-01
 
 ### Fixes

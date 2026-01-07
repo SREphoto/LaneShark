@@ -164,6 +164,38 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    // --- WATCHDOG TIMER (Reliability) ---
+    // Automatically recovers the game if it gets stuck in a transient state
+    useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+
+        const transientStates = ['ROLLING', 'PIN_SETTLEMENT', 'BALL_RETURN'];
+        const TIMEOUT_MS = 8000; // 8 seconds max for any animation
+
+        if (transientStates.includes(currentGameState)) {
+            timeoutId = setTimeout(() => {
+                console.warn(`[WATCHDOG] Game stuck in ${currentGameState} for ${TIMEOUT_MS}ms. Forcing reset.`);
+
+                // Force Recovery Logic
+                if (currentGameState === 'ROLLING') {
+                    // Ball probably stuck or fell off world
+                    setBall(prev => ({ ...prev, inGutter: true, dx: 0 }));
+                    // Let the existing loop handle gutter reset next frame, or force it:
+                    triggerEvent('gutter');
+                    setTimeout(() => setCurrentGameState('PIN_SETTLEMENT'), 100);
+                } else {
+                    // Animation stuck -> just go to ready
+                    setMessage("SYSTEM RECOVERED");
+                    setIsZoomed(false);
+                    setBall(prev => ({ ...prev, x: CANVAS_WIDTH / 2, y: BALL_START_Y, dx: 0, dy: 0, angle: 0 }));
+                    setCurrentGameState('READY_TO_BOWL');
+                }
+            }, TIMEOUT_MS);
+        }
+
+        return () => clearTimeout(timeoutId);
+    }, [currentGameState, triggerEvent]);
+
     const triggerEvent = useCallback(async (event: string, contextExtra: Partial<GameContextForCommentary> = {}) => {
         const context: GameContextForCommentary = {
             event,
@@ -184,6 +216,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             assets.clapSoundRef.current?.play().catch(() => { });
             setImpactEffectText(event === 'strike' ? 'STRIKE!' : 'SPARE!');
             setShowImpactEffect(true);
+            setScreenShake(event === 'strike' ? 20 : 10); // Shake it!
             setTimeout(() => setShowImpactEffect(false), 1000);
         } else if (event === 'gutter') {
             newSpecs.forEach(s => s.state = 'BOO');
@@ -192,11 +225,44 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
             newSpecs.forEach(s => s.state = Math.random() > 0.5 ? 'CHEER' : 'IDLE');
             if ((contextExtra.pinsKnocked || 0) > 7) {
                 assets.clapSoundRef.current?.play().catch(() => { });
+                setScreenShake(5); // Minor shake for good hits
             }
         }
         spectatorsRef.current = newSpecs;
         setSpectators(newSpecs);
     }, [currentPlayer, laneCondition, assets]);
+
+    // --- WATCHDOG TIMER (Reliability) ---
+    // Automatically recovers the game if it gets stuck in a transient state
+    useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+
+        const transientStates = ['ROLLING', 'PIN_SETTLEMENT', 'BALL_RETURN'];
+        const TIMEOUT_MS = 8000; // 8 seconds max for any animation
+
+        if (transientStates.includes(currentGameState)) {
+            timeoutId = setTimeout(() => {
+                console.warn(`[WATCHDOG] Game stuck in ${currentGameState} for ${TIMEOUT_MS}ms. Forcing reset.`);
+
+                // Force Recovery Logic
+                if (currentGameState === 'ROLLING') {
+                    // Ball probably stuck or fell off world
+                    setBall(prev => ({ ...prev, inGutter: true, dx: 0 }));
+                    // Let the existing loop handle gutter reset next frame, or force it:
+                    triggerEvent('gutter');
+                    setTimeout(() => setCurrentGameState('PIN_SETTLEMENT'), 100);
+                } else {
+                    // Animation stuck -> just go to ready
+                    setMessage("SYSTEM RECOVERED");
+                    setIsZoomed(false);
+                    setBall(prev => ({ ...prev, x: CANVAS_WIDTH / 2, y: BALL_START_Y, dx: 0, dy: 0, angle: 0 }));
+                    setCurrentGameState('READY_TO_BOWL');
+                }
+            }, TIMEOUT_MS);
+        }
+
+        return () => clearTimeout(timeoutId);
+    }, [currentGameState, triggerEvent]);
 
     const spawnImpactParticles = (x: number, y: number, count: number = 10, color: string = '#fff') => {
         const newParticles: Particle[] = [];
@@ -272,6 +338,13 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         const pins = pinsRef.current;
         let soundPlayedThisFrame = false;
 
+        // Screen Shake Decay
+        if (screenShake > 0.1) {
+            setScreenShake(prev => prev * 0.9);
+        } else if (screenShake > 0) {
+            setScreenShake(0);
+        }
+
         if (currentGameState === 'ROLLING') {
             const laneParams = LANE_PROPS[laneCondition];
             const matParams = MATERIAL_PROPS[ball.material];
@@ -289,7 +362,27 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
 
             if (!ball.inGutter) {
                 const stage = STAGES.find(s => s.id === currentStage) || STAGES[0];
-                const hookForce = ball.spin * matParams.hookPotential * laneParams.hookModifier * stage.hookMult * 0.15;
+
+                // SKID-SNAP LOGIC
+                // Lane Length ~900px (1120 -> 200)
+                const distTraveled = BALL_START_Y - ball.y;
+                let zoneFactor = 1.0;
+
+                if (distTraveled < 300) {
+                    // HEADS (0-30ft): Deep Oil -> Skid
+                    zoneFactor = 0.3;
+                } else if (distTraveled < 600) {
+                    // MID-LANE (30-45ft): Transition -> Hook starts to bite
+                    // Smooth ramp from 0.3 to 1.2
+                    const progress = (distTraveled - 300) / 300;
+                    zoneFactor = 0.3 + (progress * 0.9);
+                } else {
+                    // BACKEND (45-60ft): Dry -> Snap
+                    zoneFactor = 1.8;
+                }
+
+                // Base force increased (0.15 -> 0.25) to compensate for skid phase
+                const hookForce = ball.spin * matParams.hookPotential * laneParams.hookModifier * stage.hookMult * 0.25 * zoneFactor;
                 ball.angle += hookForce;
 
                 if (ball.x < LANE_LEFT_EDGE + BALL_RADIUS / 2 || ball.x > LANE_RIGHT_EDGE - BALL_RADIUS / 2) {
