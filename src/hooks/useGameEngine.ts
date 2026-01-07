@@ -164,37 +164,7 @@ export function useGameEngine({ assets }: UseGameEngineProps) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // --- WATCHDOG TIMER (Reliability) ---
-    // Automatically recovers the game if it gets stuck in a transient state
-    useEffect(() => {
-        let timeoutId: NodeJS.Timeout;
 
-        const transientStates = ['ROLLING', 'PIN_SETTLEMENT', 'BALL_RETURN'];
-        const TIMEOUT_MS = 8000; // 8 seconds max for any animation
-
-        if (transientStates.includes(currentGameState)) {
-            timeoutId = setTimeout(() => {
-                console.warn(`[WATCHDOG] Game stuck in ${currentGameState} for ${TIMEOUT_MS}ms. Forcing reset.`);
-
-                // Force Recovery Logic
-                if (currentGameState === 'ROLLING') {
-                    // Ball probably stuck or fell off world
-                    setBall(prev => ({ ...prev, inGutter: true, dx: 0 }));
-                    // Let the existing loop handle gutter reset next frame, or force it:
-                    triggerEvent('gutter');
-                    setTimeout(() => setCurrentGameState('PIN_SETTLEMENT'), 100);
-                } else {
-                    // Animation stuck -> just go to ready
-                    setMessage("SYSTEM RECOVERED");
-                    setIsZoomed(false);
-                    setBall(prev => ({ ...prev, x: CANVAS_WIDTH / 2, y: BALL_START_Y, dx: 0, dy: 0, angle: 0 }));
-                    setCurrentGameState('READY_TO_BOWL');
-                }
-            }, TIMEOUT_MS);
-        }
-
-        return () => clearTimeout(timeoutId);
-    }, [currentGameState, triggerEvent]);
 
     const triggerEvent = useCallback(async (event: string, contextExtra: Partial<GameContextForCommentary> = {}) => {
         const context: GameContextForCommentary = {
