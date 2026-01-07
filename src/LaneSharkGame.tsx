@@ -408,6 +408,7 @@ function LaneSharkGame() {
                             currentPlayerIdx={game.currentPlayerIdx}
                             currentFrameIdx={currentPlayer ? currentPlayer.frames.length + 1 : 1}
                             isVisible={showScorecard}
+                            onClose={() => setShowScorecard(false)}
                         />
 
                         <GameCanvas

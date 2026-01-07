@@ -12,13 +12,15 @@ interface VerticalScoreboardProps {
     currentFrameIdx: number;
     // Visible toggle for mobile
     isVisible?: boolean;
+    onClose?: () => void;
 }
 
 const VerticalScoreboard: React.FC<VerticalScoreboardProps> = ({
     players,
     currentPlayerIdx,
     currentFrameIdx,
-    isVisible = true
+    isVisible = true,
+    onClose
 }) => {
 
     // Helper to format frame display
@@ -59,7 +61,17 @@ const VerticalScoreboard: React.FC<VerticalScoreboardProps> = ({
             font-['Press_Start_2P']
         `}>
             {/* Header / Players */}
-            <div className="p-4 border-b border-white/10 bg-white/5">
+            <div className="p-4 border-b border-white/10 bg-white/5 relative">
+                {/* Close X Button - Top Right */}
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                        aria-label="Close Scorecard"
+                    >
+                        ✕
+                    </button>
+                )}
                 <h2 className="text-[10px] text-blue-400 mb-4 tracking-widest text-center">SCORECARD</h2>
                 <div className="flex gap-2 overflow-x-auto">
                     {players.map((p, idx) => (
@@ -124,10 +136,19 @@ const VerticalScoreboard: React.FC<VerticalScoreboardProps> = ({
 
             {/* Footer / Total */}
             <div className="p-4 border-t border-white/10 bg-gradient-to-t from-blue-900/20 to-transparent">
-                <div className="flex justify-between items-end">
+                <div className="flex justify-between items-end mb-3">
                     <span className="text-[8px] text-gray-400">TOTAL SCORE</span>
                     <span className="text-xl text-white shadow-glow">{players[currentPlayerIdx]?.score || 0}</span>
                 </div>
+                {/* Close Button - Bottom */}
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        className="w-full py-2 bg-red-900/40 hover:bg-red-800/60 border border-red-500/30 rounded-lg text-[8px] text-red-200 tracking-widest transition-all"
+                    >
+                        CLOSE
+                    </button>
+                )}
             </div>
         </div>
     );
