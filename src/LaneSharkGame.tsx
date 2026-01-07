@@ -14,7 +14,7 @@ import { SHOP_ITEMS } from './data/shopItems';
 import { STAGES } from './data/stages';
 
 
-// import VerticalScoreboard from './components/VerticalScoreboard';
+import VerticalScoreboard from './components/VerticalScoreboard';
 // import Scoreboard from './components/Scoreboard';
 import Scorecard from './components/Scorecard';
 import GameCanvas from './components/GameCanvas';
