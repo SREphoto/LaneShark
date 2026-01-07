@@ -59,6 +59,9 @@ function LaneSharkGame() {
         assets
     });
 
+    // Fix: LaneSharkGame manages the ref, since useGameEngine does not expose it
+    const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
     const currentPlayer = game.players[game.currentPlayerIdx];
 
     // Persist inventory when it changes
