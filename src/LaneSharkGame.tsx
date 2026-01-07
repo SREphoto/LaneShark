@@ -49,7 +49,7 @@ function LaneSharkGame() {
     // UI State
     const [isShopOpen, setIsShopOpen] = useState(false);
     const [showBallSettings, setShowBallSettings] = useState(false);
-    const [showScorecard, setShowScorecard] = useState(false);
+    const [showScorecard, setShowScorecard] = useState(true); // Open by default for visibility
     const [showProgressionPanel, setShowProgressionPanel] = useState(false);
     const [showStageSelect, setShowStageSelect] = useState(false);
     const [pendingGameConfig, setPendingGameConfig] = useState<{ mode: GameMode, cpu?: CpuPersonality, wager?: number } | null>(null);
