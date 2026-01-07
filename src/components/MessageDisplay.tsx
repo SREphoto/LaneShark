@@ -21,7 +21,6 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
             </div>
         </div>
     );
-    );
 };
 
 export default MessageDisplay;
