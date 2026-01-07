@@ -428,7 +428,7 @@ function LaneSharkGame() {
                         />
 
                         <GameCanvas
-                            canvasRef={game.canvasRef}
+                            canvasRef={canvasRef}
                             ball={game.ball}
                             pins={game.pins}
                             trail={game.trail}
