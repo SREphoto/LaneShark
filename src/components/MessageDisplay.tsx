@@ -11,7 +11,6 @@ interface MessageDisplayProps {
 
 const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
     return (
-    return (
         <div
             className="px-4 py-2 glass-panel border-white/10 shadow-lg animate-fade-in"
             aria-live="polite"
