@@ -372,55 +372,13 @@ function LaneSharkGame() {
 
                                 <h1 className="hidden md:block text-xs font-['Press_Start_2P'] gradient-text shadow-glow-effect mb-2">LANESHARK</h1>
 
-                                {/* Dynamic Message Area */}
-                                <div className="pointer-events-none flex flex-col items-center gap-2 w-full max-w-md">
-                                    <MessageDisplay message={game.message} />
-
-                                    {isThrowing && (
-                                        <div className="px-4 py-2 bg-blue-950/40 border border-blue-500/40 rounded-full animate-pulse backdrop-blur-md">
-                                            <div className="text-blue-200 font-['Press_Start_2P'] text-[8px] tracking-widest text-center whitespace-nowrap">
-                                                SPACE / TAP TO LOCK
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {currentPlayer?.isCpu && (
-                                        <div className="px-4 py-2 bg-red-950/60 border border-red-500/40 rounded-lg animate-pulse backdrop-blur-md">
-                                            <div className="text-red-300 font-['Press_Start_2P'] text-[7px] uppercase text-center mb-1">
-                                                CPU: {currentPlayer.name}
-                                            </div>
-                                            <div className="text-gray-400 font-['Press_Start_2P'] text-[6px] italic text-center">
-                                                "{currentPlayer.cpuProfile?.description}"
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Right Area: Minimal Controls (Burger Menu / Toggles) */}
-                            <div className="flex items-center gap-2 z-50 pointer-events-auto">
-                                <button
-                                    onClick={() => setShowScorecard(!showScorecard)}
-                                    className={`w-10 h-10 flex items-center justify-center rounded-xl border backdrop-blur-md transition-all ${showScorecard ? 'bg-blue-600 border-blue-400 text-white' : 'bg-black/40 border-white/10 text-blue-400 hover:bg-black/60'}`}
-                                >
-                                    📋
-                                </button>
-                                <button
-                                    onClick={() => setIsShopOpen(true)}
-                                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-purple-900/40 to-black/40 text-purple-400 backdrop-blur-md transition-all hover:scale-105"
-                                >
-                                    🛒
-                                </button>
-                                <button
-                                    onClick={() => setShowBallSettings(!showBallSettings)}
-                                    className="w-10 h-10 flex items-center justify-center rounded-xl border border-white/10 bg-black/40 text-gray-400 backdrop-blur-md transition-all hover:bg-black/60"
-                                >
-                                    ⚙️
-                                </button>
                             </div>
                         </div>
 
-                        {/* BOTTOM CONTROL BAR (Mobile Friendly) - Optional, maybe just leave clean */}
+                        {/* BOTTOM CONTROL BAR - Status Message Here to avoid blocking pins at top */}
+                        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-40 pointer-events-none w-full max-w-md px-4 flex justify-center">
+                            <MessageDisplay message={game.message} />
+                        </div>
 
                         {/* Vertical Scoreboard Sidebar */}
                         <VerticalScoreboard

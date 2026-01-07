@@ -392,7 +392,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                 ctx.translate(-x, -y);
 
                 // Reflection mask/opacity
-                ctx.globalAlpha = 0.15;
+                ctx.globalAlpha = 0.08; // Much more subtle
                 // Add a slight vertical offset for the reflection to appear "in" the floor
                 ctx.translate(0, 10);
 
