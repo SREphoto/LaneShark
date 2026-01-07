@@ -423,12 +423,12 @@ function LaneSharkGame() {
                         {/* BOTTOM CONTROL BAR (Mobile Friendly) - Optional, maybe just leave clean */}
 
                         {/* Vertical Scoreboard Sidebar */}
-                        {/* <VerticalScoreboard
+                        <VerticalScoreboard
                             players={game.players}
                             currentPlayerIdx={game.currentPlayerIdx}
                             currentFrameIdx={currentPlayer ? currentPlayer.frames.length + 1 : 1}
                             isVisible={showScorecard}
-                        /> */}
+                        />
 
                         <GameCanvas
                             canvasRef={canvasRef}
